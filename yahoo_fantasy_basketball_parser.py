@@ -14,7 +14,7 @@ import unidecode
 from statistics import stdev, mean
 
 YEAR = 2018
-N_PLAYERS_WITH_TOP_MPG = 300
+N_PLAYERS_WITH_TOP_MPG = 300 # how many players want to retrieve based on minute per game
 YFBR_STAT_NAME_MAP = {"FG%": ["FG", "FGA"], "FT%": ["FT", "FTA"], "3PTM": ["3P"], "PTS": ["PTS"], "REB": ["TRB"], "AST": ["AST"], "ST": ["STL"], "BLK": ["BLK"], "TO": ["TOV"], "G": ["G"] }
 
 def _formalize_name(name):
@@ -70,6 +70,7 @@ for stat_category in league.stat_categories():
   league_stat_categories.append(stat_category["display_name"])
 league_stat_categories += ["G"]
 
+# league total stats
 player_average_stat_list = {}
 for stat_category in league_stat_categories:
   for br_stat_name in YFBR_STAT_NAME_MAP[stat_category]:
@@ -81,8 +82,10 @@ for stat_category in league_stat_categories:
 for index, row in br_stats.iterrows():
   league_total_games += float(row["G"])
 
+# league average stats
 league_average_stats = {k: v / league_total_games for k, v in league_total_stats.items()}
 
+# league standard deviation
 for stat_category in league_stat_categories:
   br_stat_names = YFBR_STAT_NAME_MAP[stat_category]
   if len(br_stat_names) == 1:
@@ -97,7 +100,42 @@ for stat_category in league_stat_categories:
     league_standard_deviation[stat_category] = stdev(stdev_temp_list)
     league_average_stats[stat_category] = mean(stdev_temp_list)
 
-''' Parse stats and data from Yahoo Fantasy Basketball and Basketball reference to my_team_structure '''
+''' Create my_player_struct for player's total stats and z-score from Basketball reference '''
+
+my_player_struct = {}
+for index, row in br_stats.iterrows():
+  player_name = _formalize_name(index)
+  my_player_struct[player_name] = {}
+  my_player_struct[player_name]["total_stats"] = {}
+  my_player_struct[player_name]["z_scores"] = {}
+
+  # player total stats
+  for stat_category in league_stat_categories:
+    br_stat_names = YFBR_STAT_NAME_MAP[stat_category]
+    for br_stat_name in br_stat_names:
+      my_player_struct[player_name]["total_stats"][br_stat_name] = float(row[br_stat_name])
+
+  # player z-scores
+  for stat_category in league_stat_categories:
+      br_stat_names = YFBR_STAT_NAME_MAP[stat_category]
+      if stat_category is "G":
+        continue
+      if len(br_stat_names) == 1:
+        o = my_player_struct[player_name]["total_stats"][br_stat_names[0]] / my_player_struct[player_name]["total_stats"]["G"]
+        m = league_average_stats[br_stat_names[0]]
+        s = league_standard_deviation[br_stat_names[0]]
+        if br_stat_names[0] is "TOV":
+          my_player_struct[player_name]["z_scores"][br_stat_names[0]] = 0 - ((o - m) / s)
+        else:
+          my_player_struct[player_name]["z_scores"][br_stat_names[0]] = (o - m) / s
+      elif len(br_stat_names) == 2:
+        league_average = league_total_stats[br_stat_names[0]] / league_total_stats[br_stat_names[1]]
+        o = ((my_player_struct[player_name]["total_stats"][br_stat_names[0]] / my_player_struct[player_name]["total_stats"][br_stat_names[1]]) - league_average) * (my_player_struct[player_name]["total_stats"][br_stat_names[1]] / my_player_struct[player_name]["total_stats"]["G"])
+        m = league_average_stats[stat_category]
+        s = league_standard_deviation[stat_category]
+        my_player_struct[player_name]["z_scores"][stat_category] = (o - m) / s
+
+''' Create my_team_struct, parse roster from Yahoo Fantasy API and copy player data from my_player_struct '''
 
 my_team_struct = {}
 for item in league.teams():
@@ -107,45 +145,13 @@ for item in league.teams():
 
   for player in team.roster(league.current_week()):
     player_name = _formalize_name(player["name"])
-    if player_name not in br_stats.index:
+    if my_player_struct.get(player_name) is None:
       continue
-
-    my_team["players"][player_name] = {}
-    my_team["players"][player_name]["total_stats"] = {}
-    my_team["players"][player_name]["z_scores"] = {}
-
-    player_stats = br_stats.loc[player_name]
-
-    # player total stats
-    for stat_category in league_stat_categories:
-      br_stat_names = YFBR_STAT_NAME_MAP[stat_category]
-      for br_stat_name in br_stat_names:
-        my_team["players"][player_name]["total_stats"][br_stat_name] = float(player_stats[br_stat_name])
-
-    # player z-score
-    for stat_category in league_stat_categories:
-      br_stat_names = YFBR_STAT_NAME_MAP[stat_category]
-      if stat_category is "G":
-        continue
-      if len(br_stat_names) == 1:
-        o = my_team["players"][player_name]["total_stats"][br_stat_names[0]] / my_team["players"][player_name]["total_stats"]["G"]
-        m = league_average_stats[br_stat_names[0]]
-        s = league_standard_deviation[br_stat_names[0]]
-        if br_stat_names[0] is "TOV":
-          my_team["players"][player_name]["z_scores"][br_stat_names[0]] = 0 - ((o - m) / s)
-        else:
-          my_team["players"][player_name]["z_scores"][br_stat_names[0]] = (o - m) / s
-      elif len(br_stat_names) == 2:
-        league_average = league_total_stats[br_stat_names[0]] / league_total_stats[br_stat_names[1]]
-        o = ((my_team["players"][player_name]["total_stats"][br_stat_names[0]] / my_team["players"][player_name]["total_stats"][br_stat_names[1]]) - league_average) * (my_team["players"][player_name]["total_stats"][br_stat_names[1]] / my_team["players"][player_name]["total_stats"]["G"])
-        m = league_average_stats[stat_category]
-        s = league_standard_deviation[stat_category]
-        my_team["players"][player_name]["z_scores"][stat_category] = (o - m) / s
+    my_team["players"][player_name] = my_player_struct[player_name]
 
   my_team_struct[item["name"]] = my_team
 
-''' Calculate team total stats '''
-
+# team total stats
 for key, my_team in my_team_struct.items():
   my_team_total_stats = {}
   for stat_category in league_stat_categories:
@@ -156,8 +162,7 @@ for key, my_team in my_team_struct.items():
   my_team["total_stats"] = my_team_total_stats
   # print("{}\n {}\n".format(key, my_team["total_stats"]))
 
-''' Calculate team average stats '''
-
+# team average stats
 for key, my_team in my_team_struct.items():
   my_team_average_stats = {}
   my_team_total_stats = my_team["total_stats"]
@@ -170,8 +175,7 @@ for key, my_team in my_team_struct.items():
   my_team["average_stats"] = my_team_average_stats
   # print("{}\n {}\n".format(key, my_team["average_stats"]))
 
-''' Calculate team z-scores '''
-
+# team z-scores
 for key, my_team in my_team_struct.items():
   my_team_z_scores = {}
   for stat_category in league_stat_categories:
