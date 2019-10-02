@@ -15,7 +15,7 @@ from statistics import stdev, mean
 
 YEAR = 2018
 N_PLAYERS_WITH_TOP_MPG = 300 # how many players want to retrieve based on minute per game
-YFBR_STAT_NAME_MAP = {"FG%": ["FG", "FGA"], "FT%": ["FT", "FTA"], "3PTM": ["3P"], "PTS": ["PTS"], "REB": ["TRB"], "AST": ["AST"], "ST": ["STL"], "BLK": ["BLK"], "TO": ["TOV"], "G": ["G"] }
+YFBR_STAT_NAME_MAP = {"FG%": ["FG", "FGA"], "FT%": ["FT", "FTA"], "3PTM": ["3P"], "3PT%": ["3P", "3PA"], "PTS": ["PTS"], "REB": ["TRB"], "OREB": ["ORB"], "AST": ["AST"], "ST": ["STL"], "BLK": ["BLK"], "TO": ["TOV"], "A/T": ["AST", "TOV"], "G": ["G"] }
 
 def _formalize_name(name):
   name = unidecode.unidecode(name)
@@ -94,7 +94,8 @@ for stat_category in league_stat_categories:
     stdev_temp_list = []
     league_average = league_average_stats[br_stat_names[0]] / league_average_stats[br_stat_names[1]]
     for i in range(len(player_average_stat_list[br_stat_names[0]])):
-      d = (player_average_stat_list[br_stat_names[0]][i] / player_average_stat_list[br_stat_names[1]][i]) - league_average
+      player_average = 0 if player_average_stat_list[br_stat_names[1]][i] == 0 else player_average_stat_list[br_stat_names[0]][i] / player_average_stat_list[br_stat_names[1]][i]
+      d = player_average - league_average
       m = d * player_average_stat_list[br_stat_names[1]][i]
       stdev_temp_list.append(m)
     league_standard_deviation[stat_category] = stdev(stdev_temp_list)
@@ -130,7 +131,8 @@ for index, row in br_stats.iterrows():
           my_player_struct[player_name]["z_scores"][br_stat_names[0]] = (o - m) / s
       elif len(br_stat_names) == 2:
         league_average = league_total_stats[br_stat_names[0]] / league_total_stats[br_stat_names[1]]
-        o = ((my_player_struct[player_name]["total_stats"][br_stat_names[0]] / my_player_struct[player_name]["total_stats"][br_stat_names[1]]) - league_average) * (my_player_struct[player_name]["total_stats"][br_stat_names[1]] / my_player_struct[player_name]["total_stats"]["G"])
+        player_average = 0 if my_player_struct[player_name]["total_stats"][br_stat_names[1]] == 0 else my_player_struct[player_name]["total_stats"][br_stat_names[0]] / my_player_struct[player_name]["total_stats"][br_stat_names[1]]
+        o = (player_average - league_average) * (my_player_struct[player_name]["total_stats"][br_stat_names[1]] / my_player_struct[player_name]["total_stats"]["G"])
         m = league_average_stats[stat_category]
         s = league_standard_deviation[stat_category]
         my_player_struct[player_name]["z_scores"][stat_category] = (o - m) / s
@@ -182,10 +184,7 @@ for key, my_team in my_team_struct.items():
     if stat_category is "G":
       continue
     br_stat_names = YFBR_STAT_NAME_MAP[stat_category]
-    if len(br_stat_names) == 1:
-      index = br_stat_names[0];
-    elif len(br_stat_names) == 2:
-      index = stat_category
+    index = br_stat_names[0] if len(br_stat_names) == 1 else stat_category if len(br_stat_names) == 2 else 0
     my_team_z_scores[index] = 0
     for key2, player in my_team["players"].items():
       my_team_z_scores[index] += player["z_scores"][index]
