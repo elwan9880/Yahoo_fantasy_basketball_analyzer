@@ -1,7 +1,5 @@
 '''
-yahoo-fantasy-api examples
-pip install yahoo-fantasy-api
-https://pypi.org/project/yahoo-fantasy-api/
+z_score_generator
 '''
 
 from yahoo_oauth import OAuth2
@@ -13,7 +11,7 @@ import pandas as pd
 import unidecode
 from statistics import stdev, mean
 
-YEAR = 2018
+DEFAULT_YEAR = 2018
 N_PLAYERS_WITH_TOP_MPG = 300 # how many players want to retrieve based on minute per game
 YFBR_STAT_NAME_MAP = {"FG%": ["FG", "FGA"], "FT%": ["FT", "FTA"], "3PTM": ["3P"], "3PT%": ["3P", "3PA"], "PTS": ["PTS"], "REB": ["TRB"], "OREB": ["ORB"], "AST": ["AST"], "ST": ["STL"], "BLK": ["BLK"], "TO": ["TOV"], "A/T": ["AST", "TOV"], "G": ["G"] }
 
@@ -43,10 +41,25 @@ def _create_csv_output_file(file_name, my_struct):
     f.write("\n")
   f.close()
 
+''' Retrieve league data in Yahoo Fantasy Basketball '''
+
+sc = OAuth2(None, None, from_file="oauth2.json")
+game = yfa.Game(sc, "nba")
+input_year = input("What year [default: {}]: ".format(DEFAULT_YEAR)) or DEFAULT_YEAR
+year = int(input_year)
+league_id_list = game.league_ids(year=year)
+message = "Which league "
+for i in range(len(league_id_list)):
+  message += "{{{}: {}}} ".format(i, league_id_list[i])
+message += "[default: 0]: "
+input_id = input(message) or "0"
+league_id = league_id_list[int(input_id)]
+league = game.to_league(league_id)
+
 ''' Import basketball reference player total stats '''
 
 # URL page we will scraping (see image above)
-url = "https://www.basketball-reference.com/leagues/NBA_{}_totals.html".format(YEAR + 1)
+url = "https://www.basketball-reference.com/leagues/NBA_{}_totals.html".format(year + 1)
 # this is the HTML from the given URL
 html = urlopen(url)
 soup = BeautifulSoup(html, "lxml")
@@ -69,15 +82,6 @@ br_stats["MP/G"] = br_stats["MP"].astype(float) / br_stats["G"].astype(float)
 br_stats = br_stats.sort_values(by=['MP/G'], ascending=False)
 br_stats = br_stats.head(N_PLAYERS_WITH_TOP_MPG)
 br_stats = br_stats.sort_index()
-
-''' Retrieve league data in Yahoo Fantasy Basketball '''
-
-sc = OAuth2(None, None, from_file="oauth2.json")
-game = yfa.Game(sc, "nba")
-league_ids = game.league_ids(year=YEAR)
-input_id = input("Which league {} [0] : ".format(league_ids)) or "0"
-league_id = league_ids[int(input_id)]
-league = game.to_league(league_id)
 
 ''' Retrieve league stat categories and calculate league average and standard deviation using Basketball reference '''
 
@@ -225,5 +229,5 @@ for key, my_team in my_team_struct.items():
 
 ''' Print result in CSV format '''
 
-_create_csv_output_file("{}_{}_teams.csv".format(YEAR, league_id), my_team_struct)
-_create_csv_output_file("{}_{}_players.csv".format(YEAR, league_id), my_player_struct)
+_create_csv_output_file("{}_{}_teams.csv".format(year, league_id), my_team_struct)
+_create_csv_output_file("{}_{}_players.csv".format(year, league_id), my_player_struct)
