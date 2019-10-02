@@ -54,8 +54,8 @@ br_stats = br_stats.head(N_PLAYERS_WITH_TOP_MPG)
 sc = OAuth2(None, None, from_file="oauth2.json")
 game = yfa.Game(sc, "nba")
 league_ids = game.league_ids(year=YEAR)
-id = input("Which league {} [0] : ".format(league_ids)) or "0"
-league_id = league_ids[int(id)]
+input_id = input("Which league {} [0] : ".format(league_ids)) or "0"
+league_id = league_ids[int(input_id)]
 league = game.to_league(league_id)
 
 ''' Retrieve league stat categories and calculate league average and standard deviation using Basketball reference '''
@@ -168,6 +168,8 @@ for key, my_team in my_team_struct.items():
   my_team_average_stats = {}
   my_team_total_stats = my_team["total_stats"]
   for stat_category in league_stat_categories:
+    if stat_category is "G":
+      continue
     br_stat_names = YFBR_STAT_NAME_MAP[stat_category]
     if len(br_stat_names) == 1:
       my_team_average_stats[stat_category] = my_team_total_stats[br_stat_names[0]] / my_team_total_stats["G"]
@@ -189,7 +191,24 @@ for key, my_team in my_team_struct.items():
 
   my_team_struct[key]["z_scores"] = my_team_z_scores
 
-print(my_team_struct)
-
 ''' Print result in CSV format '''
-# f_team = open("{}_{}_team.txt".format(YEAR, league_id), "w+")
+
+f_team = open("{}_{}_team.csv".format(YEAR, league_id), "w+")
+print_header = True
+for key, my_team in my_team_struct.items():
+  if print_header is True:
+    f_team.write("Team,")
+    for key2, item in my_team["average_stats"].items():
+      f_team.write("{},".format(key2))
+    for key2, item in my_team["z_scores"].items():
+      f_team.write("z{},".format(key2))
+    f_team.write("\n")
+    print_header = False
+  f_team.write("{},".format(key))
+  for key2, item in my_team["average_stats"].items():
+    f_team.write("{},".format(item))
+  for key2, item in my_team["z_scores"].items():
+    f_team.write("{},".format(item))
+  f_team.write("\n")
+
+f_team.close()
