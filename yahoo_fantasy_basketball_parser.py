@@ -23,6 +23,26 @@ def _formalize_name(name):
   name = name.replace("Jakob Poltl", "Jakob Poeltl").replace("Taurean Waller-Prince", "Taurean Prince").replace("Moe Harkless", "Maurice Harkless")
   return name
 
+def _create_csv_output_file(file_name, my_struct):
+  f = open(file_name, "w+")
+  print_header = True
+  for key, item in my_struct.items():
+    if print_header is True:
+      f.write("Team,")
+      for key2, item2 in item["average_stats"].items():
+        f.write("{},".format(key2))
+      for key2, item2 in item["z_scores"].items():
+        f.write("z{},".format(key2))
+      f.write("\n")
+      print_header = False
+    f.write("{},".format(key))
+    for key2, item2 in item["average_stats"].items():
+      f.write("{},".format(item2))
+    for key2, item2 in item["z_scores"].items():
+      f.write("{},".format(item2))
+    f.write("\n")
+  f.close()
+
 ''' Import basketball reference player total stats '''
 
 # URL page we will scraping (see image above)
@@ -48,6 +68,7 @@ br_stats.set_index("Player", inplace=True)
 br_stats["MP/G"] = br_stats["MP"].astype(float) / br_stats["G"].astype(float)
 br_stats = br_stats.sort_values(by=['MP/G'], ascending=False)
 br_stats = br_stats.head(N_PLAYERS_WITH_TOP_MPG)
+br_stats = br_stats.sort_index()
 
 ''' Retrieve league data in Yahoo Fantasy Basketball '''
 
@@ -101,13 +122,14 @@ for stat_category in league_stat_categories:
     league_standard_deviation[stat_category] = stdev(stdev_temp_list)
     league_average_stats[stat_category] = mean(stdev_temp_list)
 
-''' Create my_player_struct for player's total stats and z-score from Basketball reference '''
+''' Create my_player_struct for player's total, average and z-score from Basketball reference '''
 
 my_player_struct = {}
 for index, row in br_stats.iterrows():
   player_name = _formalize_name(index)
   my_player_struct[player_name] = {}
   my_player_struct[player_name]["total_stats"] = {}
+  my_player_struct[player_name]["average_stats"] = {}
   my_player_struct[player_name]["z_scores"] = {}
 
   # player total stats
@@ -115,6 +137,16 @@ for index, row in br_stats.iterrows():
     br_stat_names = YFBR_STAT_NAME_MAP[stat_category]
     for br_stat_name in br_stat_names:
       my_player_struct[player_name]["total_stats"][br_stat_name] = float(row[br_stat_name])
+
+  # player average stats
+  for stat_category in league_stat_categories:
+      br_stat_names = YFBR_STAT_NAME_MAP[stat_category]
+      if stat_category is "G":
+        continue
+      if len(br_stat_names) == 1:
+        my_player_struct[player_name]["average_stats"][br_stat_names[0]] = my_player_struct[player_name]["total_stats"][br_stat_names[0]] / my_player_struct[player_name]["total_stats"]["G"]
+      elif len(br_stat_names) == 2:
+        my_player_struct[player_name]["average_stats"][br_stat_names[0]] = my_player_struct[player_name]["total_stats"][br_stat_names[0]] / my_player_struct[player_name]["total_stats"][br_stat_names[1]]
 
   # player z-scores
   for stat_category in league_stat_categories:
@@ -193,22 +225,5 @@ for key, my_team in my_team_struct.items():
 
 ''' Print result in CSV format '''
 
-f_team = open("{}_{}_team.csv".format(YEAR, league_id), "w+")
-print_header = True
-for key, my_team in my_team_struct.items():
-  if print_header is True:
-    f_team.write("Team,")
-    for key2, item in my_team["average_stats"].items():
-      f_team.write("{},".format(key2))
-    for key2, item in my_team["z_scores"].items():
-      f_team.write("z{},".format(key2))
-    f_team.write("\n")
-    print_header = False
-  f_team.write("{},".format(key))
-  for key2, item in my_team["average_stats"].items():
-    f_team.write("{},".format(item))
-  for key2, item in my_team["z_scores"].items():
-    f_team.write("{},".format(item))
-  f_team.write("\n")
-
-f_team.close()
+_create_csv_output_file("{}_{}_teams.csv".format(YEAR, league_id), my_team_struct)
+_create_csv_output_file("{}_{}_players.csv".format(YEAR, league_id), my_player_struct)
