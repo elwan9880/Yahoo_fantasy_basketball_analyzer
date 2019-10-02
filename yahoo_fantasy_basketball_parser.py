@@ -54,9 +54,9 @@ br_stats = br_stats.head(N_PLAYERS_WITH_TOP_MPG)
 sc = OAuth2(None, None, from_file="oauth2.json")
 game = yfa.Game(sc, "nba")
 league_ids = game.league_ids(year=YEAR)
-league_id = input("Which league {} [0] : ".format(league_ids)) or "0"
-league_id = int(league_id)
-league = game.to_league(league_ids[league_id])
+id = input("Which league {} [0] : ".format(league_ids)) or "0"
+league_id = league_ids[int(id)]
+league = game.to_league(league_id)
 
 ''' Retrieve league stat categories and calculate league average and standard deviation using Basketball reference '''
 
@@ -161,8 +161,7 @@ for key, my_team in my_team_struct.items():
       my_team_total_stats[br_stat_name] = 0
       for key2, player in my_team["players"].items():
         my_team_total_stats[br_stat_name] += player["total_stats"][br_stat_name]
-  my_team["total_stats"] = my_team_total_stats
-  # print("{}\n {}\n".format(key, my_team["total_stats"]))
+  my_team_struct[key]["total_stats"] = my_team_total_stats
 
 # team average stats
 for key, my_team in my_team_struct.items():
@@ -174,8 +173,7 @@ for key, my_team in my_team_struct.items():
       my_team_average_stats[stat_category] = my_team_total_stats[br_stat_names[0]] / my_team_total_stats["G"]
     elif len(br_stat_names) == 2:
       my_team_average_stats[stat_category] = my_team_total_stats[br_stat_names[0]] / my_team_total_stats[br_stat_names[1]]
-  my_team["average_stats"] = my_team_average_stats
-  # print("{}\n {}\n".format(key, my_team["average_stats"]))
+  my_team_struct[key]["average_stats"] = my_team_average_stats
 
 # team z-scores
 for key, my_team in my_team_struct.items():
@@ -189,5 +187,9 @@ for key, my_team in my_team_struct.items():
     for key2, player in my_team["players"].items():
       my_team_z_scores[index] += player["z_scores"][index]
 
-  my_team["z_scores"] = my_team_z_scores
-  print("{}\n {}\n".format(key, my_team["z_scores"]))
+  my_team_struct[key]["z_scores"] = my_team_z_scores
+
+print(my_team_struct)
+
+''' Print result in CSV format '''
+# f_team = open("{}_{}_team.txt".format(YEAR, league_id), "w+")
