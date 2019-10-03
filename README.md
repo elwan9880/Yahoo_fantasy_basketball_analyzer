@@ -37,6 +37,8 @@
   What year [default: 2018]: 2018
   Which league {0: 385.l.26762} {1: 385.l.4806} [default: 0]: 0
   Chun-Tses-MacBook-Pro:Yahoo_fantasy_basketball_analyzer cshao$ ls -al
+  2018_385.l.26762_teams.csv	README.me	z_score_generator.py  oauth2.json
+
   ```
 
 * TODO:
