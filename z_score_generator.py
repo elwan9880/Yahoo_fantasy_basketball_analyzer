@@ -13,7 +13,28 @@ from statistics import stdev, mean
 
 DEFAULT_YEAR = 2018
 N_PLAYERS_WITH_TOP_MPG = 300 # how many players want to retrieve based on minute per game
-YFBR_STAT_NAME_MAP = {"FG%": ["FG", "FGA"], "FT%": ["FT", "FTA"], "3PTM": ["3P"], "3PT%": ["3P", "3PA"], "PTS": ["PTS"], "REB": ["TRB"], "OREB": ["ORB"], "DREB": ["DRB"],  "AST": ["AST"], "ST": ["STL"], "BLK": ["BLK"], "TO": ["TOV"], "A/T": ["AST", "TOV"], "PF" :["PF"], "G": ["G"] }
+YFBR_STAT_NAME_MAP = {"GP": ["G"], # category name mapping from Yahoo Fantasy to Basketball reference
+                      "GS": ["GS"],
+                      "MIN": ["MP"],
+                      "FGM": ["FG"],
+                      "FGA": ["FGA"],
+                      "FG%": ["FG", "FGA"],
+                      "FTM": ["FT"],
+                      "FTA": ["FTA"],
+                      "FT%": ["FT", "FTA"],
+                      "3PTM": ["3P"],
+                      "3PTA": ["3PA"],
+                      "3PT%": ["3P", "3PA"],
+                      "PTS": ["PTS"],
+                      "DREB": ["DRB"],
+                      "OREB": ["ORB"],
+                      "REB": ["TRB"],
+                      "AST": ["AST"],
+                      "ST": ["STL"],
+                      "BLK": ["BLK"],
+                      "TO": ["TOV"],
+                      "A/T": ["AST", "TOV"],
+                      "PF" :["PF"]}
 
 def _formalize_name(name):
   name = unidecode.unidecode(name)
@@ -99,7 +120,7 @@ for stat_category in league.stat_categories():
     league_stat_category_list.append(stat_category["display_name"])
   else:
     print("{} is not supported yet and will be skipped".format(stat_category["display_name"]))
-league_stat_category_list += ["G"]
+league_stat_category_list += ["GP"]
 
 # league total stats
 player_average_stat_list = {}
@@ -150,7 +171,7 @@ for index, row in br_stats.iterrows():
   # player average stats
   for stat_category in league_stat_category_list:
       br_stat_name_list = YFBR_STAT_NAME_MAP[stat_category]
-      if stat_category is "G":
+      if stat_category is "GP":
         continue
       if len(br_stat_name_list) == 1:
         my_player_struct[player_name]["average_stats"][br_stat_name_list[0]] = _divide(my_player_struct[player_name]["total_stats"][br_stat_name_list[0]], my_player_struct[player_name]["total_stats"]["G"])
@@ -160,7 +181,7 @@ for index, row in br_stats.iterrows():
   # player z-scores
   for stat_category in league_stat_category_list:
       br_stat_name_list = YFBR_STAT_NAME_MAP[stat_category]
-      if stat_category is "G":
+      if stat_category is "GP":
         continue
       if len(br_stat_name_list) == 1:
         o = my_player_struct[player_name]["total_stats"][br_stat_name_list[0]] / my_player_struct[player_name]["total_stats"]["G"]
@@ -209,7 +230,7 @@ for key, my_team in my_team_struct.items():
   my_team_average_stats = {}
   my_team_total_stats = my_team["total_stats"]
   for stat_category in league_stat_category_list:
-    if stat_category is "G":
+    if stat_category is "GP":
       continue
     br_stat_name_list = YFBR_STAT_NAME_MAP[stat_category]
     if len(br_stat_name_list) == 1:
@@ -222,7 +243,7 @@ for key, my_team in my_team_struct.items():
 for key, my_team in my_team_struct.items():
   my_team_z_scores = {}
   for stat_category in league_stat_category_list:
-    if stat_category is "G":
+    if stat_category is "GP":
       continue
     br_stat_name_list = YFBR_STAT_NAME_MAP[stat_category]
     index = br_stat_name_list[0] if len(br_stat_name_list) == 1 else stat_category if len(br_stat_name_list) == 2 else 0
