@@ -102,7 +102,7 @@ br_stats = br_stats.dropna()
 br_stats.drop_duplicates(subset = "Player", inplace = True)
 br_stats["Player"] = br_stats["Player"].apply(lambda x: _formalize_name(x))
 br_stats.set_index("Player", inplace=True)
-br_stats["MP/G"] = br_stats["MP"].astype(float) / br_stats["G"].astype(float)
+br_stats["MP/G"] = br_stats["MP"].astype(float) / br_stats[YFBR_STAT_NAME_MAP["GP"][0]].astype(float)
 br_stats = br_stats.sort_values(by=['MP/G'], ascending=False)
 br_stats = br_stats.head(N_PLAYERS_WITH_TOP_MPG)
 br_stats = br_stats.sort_index()
@@ -130,9 +130,9 @@ for stat_category in league_stat_category_list:
     league_total_stats[br_stat_name] = 0;
     for index, row in br_stats.iterrows():
       league_total_stats[br_stat_name] += float(row[br_stat_name])
-      player_average_stat_list[br_stat_name].append(_divide(float(row[br_stat_name]), float(row["G"])))
+      player_average_stat_list[br_stat_name].append(_divide(float(row[br_stat_name]), float(row[YFBR_STAT_NAME_MAP["GP"][0]])))
 for index, row in br_stats.iterrows():
-  league_total_games += float(row["G"])
+  league_total_games += float(row[YFBR_STAT_NAME_MAP["GP"][0]])
 
 # league average stats
 league_average_stats = {k: v / league_total_games for k, v in league_total_stats.items()}
@@ -174,7 +174,7 @@ for index, row in br_stats.iterrows():
       if stat_category is "GP":
         continue
       if len(br_stat_name_list) == 1:
-        my_player_struct[player_name]["average_stats"][br_stat_name_list[0]] = _divide(my_player_struct[player_name]["total_stats"][br_stat_name_list[0]], my_player_struct[player_name]["total_stats"]["G"])
+        my_player_struct[player_name]["average_stats"][br_stat_name_list[0]] = _divide(my_player_struct[player_name]["total_stats"][br_stat_name_list[0]], my_player_struct[player_name]["total_stats"][YFBR_STAT_NAME_MAP["GP"][0]])
       elif len(br_stat_name_list) == 2:
         my_player_struct[player_name]["average_stats"][stat_category] = _divide(my_player_struct[player_name]["total_stats"][br_stat_name_list[0]], my_player_struct[player_name]["total_stats"][br_stat_name_list[1]])
 
@@ -184,7 +184,7 @@ for index, row in br_stats.iterrows():
       if stat_category is "GP":
         continue
       if len(br_stat_name_list) == 1:
-        o = my_player_struct[player_name]["total_stats"][br_stat_name_list[0]] / my_player_struct[player_name]["total_stats"]["G"]
+        o = my_player_struct[player_name]["total_stats"][br_stat_name_list[0]] / my_player_struct[player_name]["total_stats"][YFBR_STAT_NAME_MAP["GP"][0]]
         m = league_average_stats[br_stat_name_list[0]]
         s = league_standard_deviation[br_stat_name_list[0]]
         if br_stat_name_list[0] is "TOV" or br_stat_name_list[0] is "PF":
@@ -194,7 +194,7 @@ for index, row in br_stats.iterrows():
       elif len(br_stat_name_list) == 2:
         league_average = league_total_stats[br_stat_name_list[0]] / league_total_stats[br_stat_name_list[1]]
         player_average = _divide(my_player_struct[player_name]["total_stats"][br_stat_name_list[0]], my_player_struct[player_name]["total_stats"][br_stat_name_list[1]])
-        o = (player_average - league_average) * _divide(my_player_struct[player_name]["total_stats"][br_stat_name_list[1]], my_player_struct[player_name]["total_stats"]["G"])
+        o = (player_average - league_average) * _divide(my_player_struct[player_name]["total_stats"][br_stat_name_list[1]], my_player_struct[player_name]["total_stats"][YFBR_STAT_NAME_MAP["GP"][0]])
         m = league_average_stats[stat_category]
         s = league_standard_deviation[stat_category]
         my_player_struct[player_name]["z_scores"][stat_category] = (o - m) / s
@@ -234,7 +234,7 @@ for key, my_team in my_team_struct.items():
       continue
     br_stat_name_list = YFBR_STAT_NAME_MAP[stat_category]
     if len(br_stat_name_list) == 1:
-      my_team_average_stats[stat_category] = _divide(my_team_total_stats[br_stat_name_list[0]], my_team_total_stats["G"])
+      my_team_average_stats[stat_category] = _divide(my_team_total_stats[br_stat_name_list[0]], my_team_total_stats[YFBR_STAT_NAME_MAP["GP"][0]])
     elif len(br_stat_name_list) == 2:
       my_team_average_stats[stat_category] = _divide(my_team_total_stats[br_stat_name_list[0]], my_team_total_stats[br_stat_name_list[1]])
   my_team_struct[key]["average_stats"] = my_team_average_stats
