@@ -8,7 +8,7 @@
   * yahoo_fantasy_api (https://pypi.org/project/yahoo-fantasy-api/).  
     ```pip install yahoo_fantasy_api```
   * yahoo_oauth:  
-    ```pip intall yahoo_oauth```
+    ```pip install yahoo_oauth```
 
 * How to use
   1. Create `oauth.json` (https://yahoo-fantasy-api.readthedocs.io/en/latest/authentication.html).  
@@ -21,8 +21,8 @@
      1. It will pop a web browser window with your verifier. Enter the verifier in terminal.
      2. Enter the `year` and the `league_id` you would like to reference.
   3. Two CSV files will be created: 
-     * `<year>_<league_id>_teams.csv`: Team with average stats and z-scores in your league
-     * `<year>_<league_id>_players.csv`: Players with average stats and z-scores
+     * `<season>_<league_name>_teams.csv`: Team with average stats and z-scores in your league
+     * `<season>_<league_name>_players.csv`: Players with average stats and z-scores
   4. Import CSV files to google sheet or excel as CSV format (comma separated) to see the results.
 
 * Example:
@@ -34,10 +34,14 @@
   A window will be poped with your verifier.
   ```
   Enter verifier : f36qzrr
-  What year [default: 2018]: 2018
-  Which league {0: 385.l.26762} {1: 385.l.4806} [default: 0]: 0
-  Chun-Tses-MacBook-Pro:Yahoo_fantasy_basketball_analyzer cshao$ ls -al
-  2018_385.l.26762_teams.csv	README.me	z_score_generator.py  oauth2.json
+  Choose a season {0: 2018-2019} {1: 2017-2018} {2: 2016-2017} {3: 2015-2016} [default: 0]:
+  Choose a league {0: 5566 Forever} {1: Avalon} [default: 0]:
+  You select: Season: 2018-2019, League: 5566 Forever
+  Parsing Basketball Reference 2018-2019 NBA players total stats ... Done
+  Retrieving league data ... Done
+  Calculating player performance ... Done
+  Calculating team performace ... Done
+  Finished! please import "2018-2019_5566 Forever_teams.csv" and "2018-2019_5566 Forever_players.csv" to excel as CSV format to see the results.
   ```
 
 * TODO:

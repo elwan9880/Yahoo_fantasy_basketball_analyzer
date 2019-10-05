@@ -11,9 +11,8 @@ import pandas as pd
 import unidecode
 from statistics import stdev, mean
 
-DEFAULT_YEAR = 2018
 N_PLAYERS_WITH_TOP_MPG = 300 # how many players want to retrieve based on minute per game
-
+SUPPORTED_YEARS = [2018, 2017, 2016, 2015]
 YFB_STAT_CATEGORIES = {"GP":   ["GP"],
                        "GS":   ["GS"],
                        "MIN":  ["MIN"],
@@ -36,7 +35,6 @@ YFB_STAT_CATEGORIES = {"GP":   ["GP"],
                        "TO":   ["TO"],
                        "A/T":  ["AST", "TO"],
                        "PF" :  ["PF"]}
-
 BR_TO_YFB_STATS_NAME_MAP = {"G":   "GP",
                             "GS":  "GS",
                             "MP":  "MIN",
@@ -125,22 +123,47 @@ def _create_player_stats_table(year):
 
 sc = OAuth2(None, None, from_file="oauth2.json")
 game = yfa.Game(sc, "nba")
-input_year = input("What year [default: {}]: ".format(DEFAULT_YEAR)) or DEFAULT_YEAR
-year = int(input_year)
-league_id_list = game.league_ids(year=year)
-message = "Which league "
-for i in range(len(league_id_list)):
-  message += "{{{}: {}}} ".format(i, league_id_list[i])
+
+message = "Choose a season "
+for index in range(len(SUPPORTED_YEARS)):
+  message += "{{{}: {}-{}}} ".format(index, SUPPORTED_YEARS[index], SUPPORTED_YEARS[index] + 1)
 message += "[default: 0]: "
 input_id = input(message) or "0"
-league_id = league_id_list[int(input_id)]
+if int(input_id) not in range(0, len(SUPPORTED_YEARS)):
+  print("Please enter an number between 0 to {}...".format(len(league_id_name_pair_list) - 1))
+  exit(0)
+year = SUPPORTED_YEARS[int(input_id)]
+
+league_id_name_pair_list = []
+for item in game.league_ids(year=year):
+  league_id_name_pair_list.append((item, game.to_league(item).settings()["name"]))
+if not league_id_name_pair_list:
+  print("No fantasy teams in {}-{} seasons...".format(year, year + 1))
+  exit(0)
+
+message = "Choose a league "
+for index in range(len(league_id_name_pair_list)):
+  message += "{{{}: {}}} ".format(index, league_id_name_pair_list[index][1])
+message += "[default: 0]: "
+input_id = input(message) or "0"
+if int(input_id) not in range(0, len(league_id_name_pair_list)):
+  print("Please enter an number between 0 to {}...".format(len(league_id_name_pair_list) - 1))
+  exit(0)
+league_id = league_id_name_pair_list[int(input_id)][0]
+league_name = league_id_name_pair_list[int(input_id)][1]
 league = game.to_league(league_id)
+
+print("You select: Season: {}-{}, League: {} ".format(year, year + 1, league_name))
 
 ''' Import basketball reference player total stats '''
 
+print("Parsing Basketball Reference {}-{} NBA players total stats ...".format(year, year + 1), end = " ", flush = True)
 stats_table = _create_player_stats_table(year)
+print("Done")
 
 ''' Retrieve league stat categories and calculate league average and standard deviation using Basketball reference '''
+
+print("Retrieving league data ...", end = " ", flush = True)
 
 league_total_games = 0;
 league_total_stats = {}
@@ -186,7 +209,11 @@ for stat_category in league_stat_category_list:
     league_standard_deviation[stat_category] = stdev(stdev_temp_list)
     league_average_stats[stat_category] = mean(stdev_temp_list)
 
-''' Create my_player_struct for player's total, average and z-score from Basketball reference '''
+print("Done")
+
+''' Create my_player_struct for player's total, average and z-score from Basketball Reference '''
+
+print("Calculating player performance ...", end = " ", flush = True)
 
 my_player_struct = {}
 for index, row in stats_table.iterrows():
@@ -232,7 +259,11 @@ for index, row in stats_table.iterrows():
         s = league_standard_deviation[stat_category]
         my_player_struct[player_name]["z_scores"][stat_category] = (o - m) / s
 
+print("Done")
+
 ''' Create my_team_struct, parse roster from Yahoo Fantasy API and copy player data from my_player_struct '''
+
+print("Calculating team performace ...", end = " ", flush = True)
 
 my_team_struct = {}
 for item in league.teams():
@@ -283,7 +314,13 @@ for key, my_team in my_team_struct.items():
       my_team_z_scores[stat_category] += player["z_scores"][stat_category]
   my_team_struct[key]["z_scores"] = my_team_z_scores
 
+print("Done")
+
 ''' Print result in CSV format '''
 
-_create_csv_output_file("{}_{}_teams.csv".format(year, league_id), my_team_struct)
-_create_csv_output_file("{}_{}_players.csv".format(year, league_id), my_player_struct)
+teams_csv_name = "{}-{}_{}_teams.csv".format(year, year + 1, league_name)
+players_csv_name = "{}-{}_{}_players.csv".format(year, year + 1, league_name)
+_create_csv_output_file(teams_csv_name, my_team_struct)
+_create_csv_output_file(players_csv_name, my_player_struct)
+
+print("Finished! please import \"{}\" and \"{}\" to excel as CSV format to see the results.".format(teams_csv_name, players_csv_name))
