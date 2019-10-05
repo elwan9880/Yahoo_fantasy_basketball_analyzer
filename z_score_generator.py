@@ -13,29 +13,51 @@ from statistics import stdev, mean
 
 DEFAULT_YEAR = 2018
 N_PLAYERS_WITH_TOP_MPG = 300 # how many players want to retrieve based on minute per game
-YFBR_STAT_NAME_MAP = {"GP": ["G"], # category name mapping from Yahoo Fantasy to Basketball reference
-                      "GS": ["GS"],
-                      "MIN": ["MP"],
-                      "FGM": ["FG"],
-                      "FGA": ["FGA"],
-                      "FG%": ["FG", "FGA"],
-                      "FTM": ["FT"],
-                      "FTA": ["FTA"],
-                      "FT%": ["FT", "FTA"],
-                      "3PTM": ["3P"],
-                      "3PTA": ["3PA"],
-                      "3PT%": ["3P", "3PA"],
-                      "PTS": ["PTS"],
-                      "DREB": ["DRB"],
-                      "OREB": ["ORB"],
-                      "REB": ["TRB"],
-                      "AST": ["AST"],
-                      "ST": ["STL"],
-                      "BLK": ["BLK"],
-                      "TO": ["TOV"],
-                      "A/T": ["AST", "TOV"],
-                      "PF" :["PF"]}
 
+YFB_STAT_CATEGORIES = {"GP":   ["GP"],
+                       "GS":   ["GS"],
+                       "MIN":  ["MIN"],
+                       "FGM":  ["FGM"],
+                       "FGA":  ["FGA"],
+                       "FG%":  ["FGM", "FGA"],
+                       "FTM":  ["FTM"],
+                       "FTA":  ["FTA"],
+                       "FT%":  ["FTM", "FTA"],
+                       "3PTM": ["3PTM"],
+                       "3PTA": ["3PTA"],
+                       "3PT%": ["3PTM", "3PTA"],
+                       "PTS":  ["PTS"],
+                       "DREB": ["DREB"],
+                       "OREB": ["OREB"],
+                       "REB":  ["REB"],
+                       "AST":  ["AST"],
+                       "ST":   ["ST"],
+                       "BLK":  ["BLK"],
+                       "TO":   ["TO"],
+                       "A/T":  ["AST", "TO"],
+                       "PF" :  ["PF"]}
+
+BR_TO_YFB_STATS_NAME_MAP = {"G":   "GP",
+                            "GS":  "GS",
+                            "MP":  "MIN",
+                            "FG":  "FGM",
+                            "FGA": "FGA",
+                            "FG%": "FG%",
+                            "FT":  "FTM",
+                            "FTA": "FTA",
+                            "FT%": "FT%",
+                            "3P":  "3PTM",
+                            "3PA": "3PTA",
+                            "3P%": "3PT%",
+                            "PTS": "PTS",
+                            "DRB": "DREB",
+                            "ORB": "OREB",
+                            "TRB": "REB",
+                            "AST": "AST",
+                            "STL": "ST",
+                            "BLK": "BLK",
+                            "TOV": "TO",
+                            "PF":  "PF"}
 def _formalize_name(name):
   name = unidecode.unidecode(name)
   name = name.replace(".", "").replace(" Jr", "").replace(" III", "")
@@ -65,6 +87,40 @@ def _create_csv_output_file(file_name, my_struct):
 def _divide(numerator, denominator):
   return float(numerator) / float(denominator) if float(denominator) != 0 else 0
 
+def _create_player_stats_table(year):
+  # URL page we will scraping (see image above)
+  url = "https://www.basketball-reference.com/leagues/NBA_{}_totals.html".format(year + 1)
+  # this is the HTML from the given URL
+  html = urlopen(url)
+  soup = BeautifulSoup(html, "lxml")
+  # use findALL() to get the column headers
+  soup.findAll('tr', limit=2)
+  # use getText() to extract the text we need into a list
+  headers = [th.getText() for th in soup.findAll('tr', limit=2)[0].findAll('th')]
+  # exclude the first column as we will not need the ranking order from Basketball Reference for the analysis
+  headers = headers[1:]
+  # avoid the first header row
+  rows = soup.findAll('tr')[1:]
+  player_stats = [[td.getText() for td in rows[i].findAll('td')] for i in range(len(rows))]
+
+  br_stats_table = pd.DataFrame(player_stats, columns = headers)
+  br_stats_table = br_stats_table.dropna()
+  br_stats_table.drop_duplicates(subset = "Player", inplace = True)
+  br_stats_table["Player"] = br_stats_table["Player"].apply(lambda x: _formalize_name(x))
+  br_stats_table.set_index("Player", inplace=True)
+
+  # rename table header with Yahoo fantasy basketball stats name
+  for key, value in BR_TO_YFB_STATS_NAME_MAP.items():
+    br_stats_table = br_stats_table.rename(columns={key: value})
+
+  # filter players based on MPG
+  br_stats_table["MPG"] = br_stats_table["MIN"].astype(float) / br_stats_table["GP"].astype(float)
+  br_stats_table = br_stats_table.sort_values(by=['MPG'], ascending=False)
+  br_stats_table = br_stats_table.head(N_PLAYERS_WITH_TOP_MPG)
+  br_stats_table = br_stats_table.sort_index()
+
+  return br_stats_table
+
 ''' Retrieve league data in Yahoo Fantasy Basketball '''
 
 sc = OAuth2(None, None, from_file="oauth2.json")
@@ -82,30 +138,7 @@ league = game.to_league(league_id)
 
 ''' Import basketball reference player total stats '''
 
-# URL page we will scraping (see image above)
-url = "https://www.basketball-reference.com/leagues/NBA_{}_totals.html".format(year + 1)
-# this is the HTML from the given URL
-html = urlopen(url)
-soup = BeautifulSoup(html, "lxml")
-# use findALL() to get the column headers
-soup.findAll('tr', limit=2)
-# use getText() to extract the text we need into a list
-headers = [th.getText() for th in soup.findAll('tr', limit=2)[0].findAll('th')]
-# exclude the first column as we will not need the ranking order from Basketball Reference for the analysis
-headers = headers[1:]
-# avoid the first header row
-rows = soup.findAll('tr')[1:]
-player_stats = [[td.getText() for td in rows[i].findAll('td')] for i in range(len(rows))]
-
-br_stats = pd.DataFrame(player_stats, columns = headers)
-br_stats = br_stats.dropna()
-br_stats.drop_duplicates(subset = "Player", inplace = True)
-br_stats["Player"] = br_stats["Player"].apply(lambda x: _formalize_name(x))
-br_stats.set_index("Player", inplace=True)
-br_stats["MP/G"] = br_stats["MP"].astype(float) / br_stats[YFBR_STAT_NAME_MAP["GP"][0]].astype(float)
-br_stats = br_stats.sort_values(by=['MP/G'], ascending=False)
-br_stats = br_stats.head(N_PLAYERS_WITH_TOP_MPG)
-br_stats = br_stats.sort_index()
+stats_table = _create_player_stats_table(year)
 
 ''' Retrieve league stat categories and calculate league average and standard deviation using Basketball reference '''
 
@@ -116,7 +149,7 @@ league_standard_deviation = {}
 league_stat_category_list = []
 
 for stat_category in league.stat_categories():
-  if YFBR_STAT_NAME_MAP.get(stat_category["display_name"]) is not None:
+  if YFB_STAT_CATEGORIES.get(stat_category["display_name"]) is not None:
     league_stat_category_list.append(stat_category["display_name"])
   else:
     print("{} is not supported yet and will be skipped".format(stat_category["display_name"]))
@@ -125,30 +158,30 @@ league_stat_category_list += ["GP"]
 # league total stats
 player_average_stat_list = {}
 for stat_category in league_stat_category_list:
-  for br_stat_name in YFBR_STAT_NAME_MAP[stat_category]:
-    player_average_stat_list[br_stat_name] = []
-    league_total_stats[br_stat_name] = 0;
-    for index, row in br_stats.iterrows():
-      league_total_stats[br_stat_name] += float(row[br_stat_name])
-      player_average_stat_list[br_stat_name].append(_divide(float(row[br_stat_name]), float(row[YFBR_STAT_NAME_MAP["GP"][0]])))
-for index, row in br_stats.iterrows():
-  league_total_games += float(row[YFBR_STAT_NAME_MAP["GP"][0]])
+  for stat_name in YFB_STAT_CATEGORIES[stat_category]:
+    player_average_stat_list[stat_name] = []
+    league_total_stats[stat_name] = 0;
+    for index, row in stats_table.iterrows():
+      league_total_stats[stat_name] += float(row[stat_name])
+      player_average_stat_list[stat_name].append(_divide(float(row[stat_name]), float(row["GP"])))
+for index, row in stats_table.iterrows():
+  league_total_games += float(row["GP"])
 
 # league average stats
 league_average_stats = {k: v / league_total_games for k, v in league_total_stats.items()}
 
 # league standard deviation
 for stat_category in league_stat_category_list:
-  br_stat_name_list = YFBR_STAT_NAME_MAP[stat_category]
-  if len(br_stat_name_list) == 1:
-    league_standard_deviation[br_stat_name_list[0]] = stdev(player_average_stat_list[br_stat_name_list[0]])
-  elif len(br_stat_name_list) == 2:
+  stat_name_list = YFB_STAT_CATEGORIES[stat_category]
+  if len(stat_name_list) == 1:
+    league_standard_deviation[stat_category] = stdev(player_average_stat_list[stat_category])
+  elif len(stat_name_list) == 2:
     stdev_temp_list = []
-    league_average = _divide(league_average_stats[br_stat_name_list[0]], league_average_stats[br_stat_name_list[1]])
-    for i in range(len(player_average_stat_list[br_stat_name_list[0]])):
-      player_average = _divide(player_average_stat_list[br_stat_name_list[0]][i], player_average_stat_list[br_stat_name_list[1]][i])
+    league_average = _divide(league_average_stats[stat_name_list[0]], league_average_stats[stat_name_list[1]])
+    for i in range(len(player_average_stat_list[stat_name_list[0]])):
+      player_average = _divide(player_average_stat_list[stat_name_list[0]][i], player_average_stat_list[stat_name_list[1]][i])
       d = player_average - league_average
-      m = d * player_average_stat_list[br_stat_name_list[1]][i]
+      m = d * player_average_stat_list[stat_name_list[1]][i]
       stdev_temp_list.append(m)
     league_standard_deviation[stat_category] = stdev(stdev_temp_list)
     league_average_stats[stat_category] = mean(stdev_temp_list)
@@ -156,7 +189,7 @@ for stat_category in league_stat_category_list:
 ''' Create my_player_struct for player's total, average and z-score from Basketball reference '''
 
 my_player_struct = {}
-for index, row in br_stats.iterrows():
+for index, row in stats_table.iterrows():
   player_name = _formalize_name(index)
   my_player_struct[player_name] = {}
   my_player_struct[player_name]["total_stats"] = {}
@@ -165,36 +198,36 @@ for index, row in br_stats.iterrows():
 
   # player total stats
   for stat_category in league_stat_category_list:
-    for br_stat_name in YFBR_STAT_NAME_MAP[stat_category]:
-      my_player_struct[player_name]["total_stats"][br_stat_name] = float(row[br_stat_name])
+    for stat_name in YFB_STAT_CATEGORIES[stat_category]:
+      my_player_struct[player_name]["total_stats"][stat_name] = float(row[stat_name])
 
   # player average stats
   for stat_category in league_stat_category_list:
-      br_stat_name_list = YFBR_STAT_NAME_MAP[stat_category]
+      stat_name_list = YFB_STAT_CATEGORIES[stat_category]
       if stat_category is "GP":
         continue
-      if len(br_stat_name_list) == 1:
-        my_player_struct[player_name]["average_stats"][br_stat_name_list[0]] = _divide(my_player_struct[player_name]["total_stats"][br_stat_name_list[0]], my_player_struct[player_name]["total_stats"][YFBR_STAT_NAME_MAP["GP"][0]])
-      elif len(br_stat_name_list) == 2:
-        my_player_struct[player_name]["average_stats"][stat_category] = _divide(my_player_struct[player_name]["total_stats"][br_stat_name_list[0]], my_player_struct[player_name]["total_stats"][br_stat_name_list[1]])
+      if len(stat_name_list) == 1:
+        my_player_struct[player_name]["average_stats"][stat_category] = _divide(my_player_struct[player_name]["total_stats"][stat_category], my_player_struct[player_name]["total_stats"]["GP"])
+      elif len(stat_name_list) == 2:
+        my_player_struct[player_name]["average_stats"][stat_category] = _divide(my_player_struct[player_name]["total_stats"][stat_name_list[0]], my_player_struct[player_name]["total_stats"][stat_name_list[1]])
 
   # player z-scores
   for stat_category in league_stat_category_list:
-      br_stat_name_list = YFBR_STAT_NAME_MAP[stat_category]
+      stat_name_list = YFB_STAT_CATEGORIES[stat_category]
       if stat_category is "GP":
         continue
-      if len(br_stat_name_list) == 1:
-        o = my_player_struct[player_name]["total_stats"][br_stat_name_list[0]] / my_player_struct[player_name]["total_stats"][YFBR_STAT_NAME_MAP["GP"][0]]
-        m = league_average_stats[br_stat_name_list[0]]
-        s = league_standard_deviation[br_stat_name_list[0]]
-        if br_stat_name_list[0] is "TOV" or br_stat_name_list[0] is "PF":
-          my_player_struct[player_name]["z_scores"][br_stat_name_list[0]] = 0 - ((o - m) / s)
+      if len(stat_name_list) == 1:
+        o = my_player_struct[player_name]["total_stats"][stat_category] / my_player_struct[player_name]["total_stats"]["GP"]
+        m = league_average_stats[stat_category]
+        s = league_standard_deviation[stat_category]
+        if stat_category in {"TO", "PF"}:
+          my_player_struct[player_name]["z_scores"][stat_category] = 0 - ((o - m) / s)
         else:
-          my_player_struct[player_name]["z_scores"][br_stat_name_list[0]] = (o - m) / s
-      elif len(br_stat_name_list) == 2:
-        league_average = league_total_stats[br_stat_name_list[0]] / league_total_stats[br_stat_name_list[1]]
-        player_average = _divide(my_player_struct[player_name]["total_stats"][br_stat_name_list[0]], my_player_struct[player_name]["total_stats"][br_stat_name_list[1]])
-        o = (player_average - league_average) * _divide(my_player_struct[player_name]["total_stats"][br_stat_name_list[1]], my_player_struct[player_name]["total_stats"][YFBR_STAT_NAME_MAP["GP"][0]])
+          my_player_struct[player_name]["z_scores"][stat_category] = (o - m) / s
+      elif len(stat_name_list) == 2:
+        league_average = league_total_stats[stat_name_list[0]] / league_total_stats[stat_name_list[1]]
+        player_average = _divide(my_player_struct[player_name]["total_stats"][stat_name_list[0]], my_player_struct[player_name]["total_stats"][stat_name_list[1]])
+        o = _divide((player_average - league_average) * my_player_struct[player_name]["total_stats"][stat_name_list[1]], my_player_struct[player_name]["total_stats"]["GP"])
         m = league_average_stats[stat_category]
         s = league_standard_deviation[stat_category]
         my_player_struct[player_name]["z_scores"][stat_category] = (o - m) / s
@@ -219,10 +252,10 @@ for item in league.teams():
 for key, my_team in my_team_struct.items():
   my_team_total_stats = {}
   for stat_category in league_stat_category_list:
-    for br_stat_name in YFBR_STAT_NAME_MAP[stat_category]:
-      my_team_total_stats[br_stat_name] = 0
+    for stat_name in YFB_STAT_CATEGORIES[stat_category]:
+      my_team_total_stats[stat_name] = 0
       for key2, player in my_team["players"].items():
-        my_team_total_stats[br_stat_name] += player["total_stats"][br_stat_name]
+        my_team_total_stats[stat_name] += player["total_stats"][stat_name]
   my_team_struct[key]["total_stats"] = my_team_total_stats
 
 # team average stats
@@ -232,11 +265,11 @@ for key, my_team in my_team_struct.items():
   for stat_category in league_stat_category_list:
     if stat_category is "GP":
       continue
-    br_stat_name_list = YFBR_STAT_NAME_MAP[stat_category]
-    if len(br_stat_name_list) == 1:
-      my_team_average_stats[stat_category] = _divide(my_team_total_stats[br_stat_name_list[0]], my_team_total_stats[YFBR_STAT_NAME_MAP["GP"][0]])
-    elif len(br_stat_name_list) == 2:
-      my_team_average_stats[stat_category] = _divide(my_team_total_stats[br_stat_name_list[0]], my_team_total_stats[br_stat_name_list[1]])
+    stat_name_list = YFB_STAT_CATEGORIES[stat_category]
+    if len(stat_name_list) == 1:
+      my_team_average_stats[stat_category] = _divide(my_team_total_stats[stat_category], my_team_total_stats["GP"])
+    elif len(stat_name_list) == 2:
+      my_team_average_stats[stat_category] = _divide(my_team_total_stats[stat_name_list[0]], my_team_total_stats[stat_name_list[1]])
   my_team_struct[key]["average_stats"] = my_team_average_stats
 
 # team z-scores
@@ -245,11 +278,9 @@ for key, my_team in my_team_struct.items():
   for stat_category in league_stat_category_list:
     if stat_category is "GP":
       continue
-    br_stat_name_list = YFBR_STAT_NAME_MAP[stat_category]
-    index = br_stat_name_list[0] if len(br_stat_name_list) == 1 else stat_category if len(br_stat_name_list) == 2 else 0
-    my_team_z_scores[index] = 0
+    my_team_z_scores[stat_category] = 0
     for key2, player in my_team["players"].items():
-      my_team_z_scores[index] += player["z_scores"][index]
+      my_team_z_scores[stat_category] += player["z_scores"][stat_category]
   my_team_struct[key]["z_scores"] = my_team_z_scores
 
 ''' Print result in CSV format '''
