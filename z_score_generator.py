@@ -165,49 +165,50 @@ print("Done")
 
 print("Retrieving league data ...", end = " ", flush = True)
 
-league_total_games = 0;
-league_total_stats = {}
-league_average_stats = {}
-league_standard_deviation = {}
-league_stat_category_list = []
+my_league_struct = {}
+my_league_struct["total_games"] = 0;
+my_league_struct["total_stats"] = {}
+my_league_struct["average_stats"] = {}
+my_league_struct["standard_deviation"] = {}
+my_league_struct["stat_category_list"] = []
 
 for stat_category in league.stat_categories():
   if YFB_STAT_CATEGORIES.get(stat_category["display_name"]) is not None:
-    league_stat_category_list.append(stat_category["display_name"])
+    my_league_struct["stat_category_list"].append(stat_category["display_name"])
   else:
     print("{} is not supported yet and will be skipped".format(stat_category["display_name"]))
-league_stat_category_list += ["GP"]
+my_league_struct["stat_category_list"] += ["GP"]
 
 # league total stats
 player_average_stat_list = {}
-for stat_category in league_stat_category_list:
+for stat_category in my_league_struct["stat_category_list"]:
   for stat_name in YFB_STAT_CATEGORIES[stat_category]:
     player_average_stat_list[stat_name] = []
-    league_total_stats[stat_name] = 0;
+    my_league_struct["total_stats"][stat_name] = 0;
     for index, row in stats_table.iterrows():
-      league_total_stats[stat_name] += float(row[stat_name])
+      my_league_struct["total_stats"][stat_name] += float(row[stat_name])
       player_average_stat_list[stat_name].append(_divide(float(row[stat_name]), float(row["GP"])))
 for index, row in stats_table.iterrows():
-  league_total_games += float(row["GP"])
+  my_league_struct["total_games"] += float(row["GP"])
 
 # league average stats
-league_average_stats = {k: v / league_total_games for k, v in league_total_stats.items()}
+my_league_struct["average_stats"] = {k: v / my_league_struct["total_games"] for k, v in my_league_struct["total_stats"].items()}
 
 # league standard deviation
-for stat_category in league_stat_category_list:
+for stat_category in my_league_struct["stat_category_list"]:
   stat_name_list = YFB_STAT_CATEGORIES[stat_category]
   if len(stat_name_list) == 1:
-    league_standard_deviation[stat_category] = stdev(player_average_stat_list[stat_category])
+    my_league_struct["standard_deviation"][stat_category] = stdev(player_average_stat_list[stat_category])
   elif len(stat_name_list) == 2:
     stdev_temp_list = []
-    league_average = _divide(league_average_stats[stat_name_list[0]], league_average_stats[stat_name_list[1]])
+    league_average = _divide(my_league_struct["average_stats"][stat_name_list[0]], my_league_struct["average_stats"][stat_name_list[1]])
     for i in range(len(player_average_stat_list[stat_name_list[0]])):
       player_average = _divide(player_average_stat_list[stat_name_list[0]][i], player_average_stat_list[stat_name_list[1]][i])
       d = player_average - league_average
       m = d * player_average_stat_list[stat_name_list[1]][i]
       stdev_temp_list.append(m)
-    league_standard_deviation[stat_category] = stdev(stdev_temp_list)
-    league_average_stats[stat_category] = mean(stdev_temp_list)
+    my_league_struct["standard_deviation"][stat_category] = stdev(stdev_temp_list)
+    my_league_struct["average_stats"][stat_category] = mean(stdev_temp_list)
 
 print("Done")
 
@@ -224,12 +225,12 @@ for index, row in stats_table.iterrows():
   my_player_struct[player_name]["z_scores"] = {}
 
   # player total stats
-  for stat_category in league_stat_category_list:
+  for stat_category in my_league_struct["stat_category_list"]:
     for stat_name in YFB_STAT_CATEGORIES[stat_category]:
       my_player_struct[player_name]["total_stats"][stat_name] = float(row[stat_name])
 
   # player average stats
-  for stat_category in league_stat_category_list:
+  for stat_category in my_league_struct["stat_category_list"]:
       stat_name_list = YFB_STAT_CATEGORIES[stat_category]
       if stat_category is "GP":
         continue
@@ -239,24 +240,24 @@ for index, row in stats_table.iterrows():
         my_player_struct[player_name]["average_stats"][stat_category] = _divide(my_player_struct[player_name]["total_stats"][stat_name_list[0]], my_player_struct[player_name]["total_stats"][stat_name_list[1]])
 
   # player z-scores
-  for stat_category in league_stat_category_list:
+  for stat_category in my_league_struct["stat_category_list"]:
       stat_name_list = YFB_STAT_CATEGORIES[stat_category]
       if stat_category is "GP":
         continue
       if len(stat_name_list) == 1:
         o = my_player_struct[player_name]["total_stats"][stat_category] / my_player_struct[player_name]["total_stats"]["GP"]
-        m = league_average_stats[stat_category]
-        s = league_standard_deviation[stat_category]
+        m = my_league_struct["average_stats"][stat_category]
+        s = my_league_struct["standard_deviation"][stat_category]
         if stat_category in {"TO", "PF"}:
           my_player_struct[player_name]["z_scores"][stat_category] = 0 - ((o - m) / s)
         else:
           my_player_struct[player_name]["z_scores"][stat_category] = (o - m) / s
       elif len(stat_name_list) == 2:
-        league_average = league_total_stats[stat_name_list[0]] / league_total_stats[stat_name_list[1]]
+        league_average = my_league_struct["total_stats"][stat_name_list[0]] / my_league_struct["total_stats"][stat_name_list[1]]
         player_average = _divide(my_player_struct[player_name]["total_stats"][stat_name_list[0]], my_player_struct[player_name]["total_stats"][stat_name_list[1]])
         o = _divide((player_average - league_average) * my_player_struct[player_name]["total_stats"][stat_name_list[1]], my_player_struct[player_name]["total_stats"]["GP"])
-        m = league_average_stats[stat_category]
-        s = league_standard_deviation[stat_category]
+        m = my_league_struct["average_stats"][stat_category]
+        s = my_league_struct["standard_deviation"][stat_category]
         my_player_struct[player_name]["z_scores"][stat_category] = (o - m) / s
 
 print("Done")
@@ -282,7 +283,7 @@ for item in league.teams():
 # team total stats
 for key, my_team in my_team_struct.items():
   my_team_total_stats = {}
-  for stat_category in league_stat_category_list:
+  for stat_category in my_league_struct["stat_category_list"]:
     for stat_name in YFB_STAT_CATEGORIES[stat_category]:
       my_team_total_stats[stat_name] = 0
       for key2, player in my_team["players"].items():
@@ -293,7 +294,7 @@ for key, my_team in my_team_struct.items():
 for key, my_team in my_team_struct.items():
   my_team_average_stats = {}
   my_team_total_stats = my_team["total_stats"]
-  for stat_category in league_stat_category_list:
+  for stat_category in my_league_struct["stat_category_list"]:
     if stat_category is "GP":
       continue
     stat_name_list = YFB_STAT_CATEGORIES[stat_category]
@@ -306,7 +307,7 @@ for key, my_team in my_team_struct.items():
 # team z-scores
 for key, my_team in my_team_struct.items():
   my_team_z_scores = {}
-  for stat_category in league_stat_category_list:
+  for stat_category in my_league_struct["stat_category_list"]:
     if stat_category is "GP":
       continue
     my_team_z_scores[stat_category] = 0
