@@ -119,7 +119,7 @@ def _create_player_stats_table(year):
 
   return br_stats_table
 
-def _create_my_league_struct(league):
+def _create_my_league_struct(league, stats_table):
   my_league_struct = {}
   my_league_struct["name"] = league.settings()["name"]
   my_league_struct["total_games"] = 0;
@@ -168,7 +168,7 @@ def _create_my_league_struct(league):
 
   return my_league_struct
 
-def _create_my_player_struct(my_league_struct):
+def _create_my_player_struct(my_league_struct, stats_table):
   my_player_struct = {}
   for index, row in stats_table.iterrows():
     player_name = _formalize_name(index)
@@ -311,13 +311,13 @@ print("Done")
 ''' Retrieve league stat categories and calculate league average and standard deviation using Basketball reference '''
 
 print("Retrieving league data ...", end = " ", flush = True)
-my_league_struct = _create_my_league_struct(league)
+my_league_struct = _create_my_league_struct(league, stats_table)
 print("Done")
 
 ''' Create my_player_struct for player's total, average and z-score from Basketball Reference '''
 
 print("Calculating player performance ...", end = " ", flush = True)
-my_player_struct = _create_my_player_struct(my_league_struct)
+my_player_struct = _create_my_player_struct(my_league_struct, stats_table)
 print("Done")
 
 ''' Create my_team_struct, parse roster from Yahoo Fantasy API and copy player data from my_player_struct '''
