@@ -9,9 +9,13 @@
     ```pip install yahoo_fantasy_api```
   * yahoo_oauth:  
     ```pip install yahoo_oauth```
+  * lxml
+  * bs4
+  * pandas
+  * unidecode
 
 * How to use
-  1. Create `oauth.json` (https://yahoo-fantasy-api.readthedocs.io/en/latest/authentication.html).  
+  1. Create `oauth2.json` (https://yahoo-fantasy-api.readthedocs.io/en/latest/authentication.html).  
      1. Apply Yahoo API key (https://developer.yahoo.com/apps/create/). It will give you `consumer_key` and `consumer_secret`.   
      2. Create `oauth.json` under the same directory with `z_score_generator.py` with your api key:  
         ```
