@@ -9,6 +9,7 @@
     ```pip install yahoo_fantasy_api```
   * yahoo_oauth:  
     ```pip install yahoo_oauth```
+  * lxml
   * bs4
   * pandas
   * unidecode
