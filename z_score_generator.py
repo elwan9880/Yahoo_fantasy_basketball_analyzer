@@ -215,7 +215,7 @@ def _create_my_player_struct(my_league_struct, stats_table):
 
   return my_player_struct
 
-def _create_my_team_struct(my_league_struct, my_player_struct):
+def _create_my_team_struct(league, my_league_struct, my_player_struct):
   my_team_struct = {}
   for item in league.teams():
     team = league.to_team(item["team_key"])
@@ -281,56 +281,61 @@ def _print_options_and_get_input(name, my_list):
 
   return int(input_id)
 
-''' Retrieve league data in Yahoo Fantasy Basketball '''
 
-sc = OAuth2(None, None, from_file="oauth2.json")
-game = yfa.Game(sc, "nba")
+def main():
+  ''' Retrieve league data in Yahoo Fantasy Basketball '''
 
-year = SUPPORTED_YEARS[_print_options_and_get_input("season", SUPPORTED_YEARS)]
+  sc = OAuth2(None, None, from_file="oauth2.json")
+  game = yfa.Game(sc, "nba")
 
-league_id_name_pair_list = []
-for item in game.league_ids(year=year):
-  league_id_name_pair_list.append((item, game.to_league(item).settings()["name"]))
-if not league_id_name_pair_list:
-  print("No fantasy teams in {}-{} seasons...".format(year, year + 1))
-  exit(0)
+  year = SUPPORTED_YEARS[_print_options_and_get_input("season", SUPPORTED_YEARS)]
 
-input_id = _print_options_and_get_input("league", league_id_name_pair_list)
-league_id = league_id_name_pair_list[int(input_id)][0]
-league_name = league_id_name_pair_list[int(input_id)][1]
-league = game.to_league(league_id)
+  league_id_name_pair_list = []
+  for item in game.league_ids(year=year):
+    league_id_name_pair_list.append((item, game.to_league(item).settings()["name"]))
+  if not league_id_name_pair_list:
+    print("No fantasy teams in {}-{} seasons...".format(year, year + 1))
+    exit(0)
 
-print("You select: Season: {}-{}, League: {} ".format(year, year + 1, league_name))
+  input_id = _print_options_and_get_input("league", league_id_name_pair_list)
+  league_id = league_id_name_pair_list[int(input_id)][0]
+  league_name = league_id_name_pair_list[int(input_id)][1]
+  league = game.to_league(league_id)
 
-''' Import basketball reference player total stats '''
+  print("You select: Season: {}-{}, League: {} ".format(year, year + 1, league_name))
 
-print("Parsing Basketball Reference {}-{} NBA players total stats ...".format(year, year + 1), end = " ", flush = True)
-stats_table = _create_player_stats_table(year)
-print("Done")
+  ''' Import basketball reference player total stats '''
 
-''' Retrieve league stat categories and calculate league average and standard deviation using Basketball reference '''
+  print("Parsing Basketball Reference {}-{} NBA players total stats ...".format(year, year + 1), end = " ", flush = True)
+  stats_table = _create_player_stats_table(year)
+  print("Done")
 
-print("Retrieving league data ...", end = " ", flush = True)
-my_league_struct = _create_my_league_struct(league, stats_table)
-print("Done")
+  ''' Retrieve league stat categories and calculate league average and standard deviation using Basketball reference '''
 
-''' Create my_player_struct for player's total, average and z-score from Basketball Reference '''
+  print("Retrieving league data ...", end = " ", flush = True)
+  my_league_struct = _create_my_league_struct(league, stats_table)
+  print("Done")
 
-print("Calculating player performance ...", end = " ", flush = True)
-my_player_struct = _create_my_player_struct(my_league_struct, stats_table)
-print("Done")
+  ''' Create my_player_struct for player's total, average and z-score from Basketball Reference '''
 
-''' Create my_team_struct, parse roster from Yahoo Fantasy API and copy player data from my_player_struct '''
+  print("Calculating player performance ...", end = " ", flush = True)
+  my_player_struct = _create_my_player_struct(my_league_struct, stats_table)
+  print("Done")
 
-print("Calculating team performace ...", end = " ", flush = True)
-my_team_struct = _create_my_team_struct(my_league_struct, my_player_struct)
-print("Done")
+  ''' Create my_team_struct, parse roster from Yahoo Fantasy API and copy player data from my_player_struct '''
 
-''' Print result in CSV format '''
+  print("Calculating team performace ...", end = " ", flush = True)
+  my_team_struct = _create_my_team_struct(league, my_league_struct, my_player_struct)
+  print("Done")
 
-teams_csv_name = "{}-{}_{}_teams.csv".format(year, year + 1, my_league_struct["name"])
-players_csv_name = "{}-{}_{}_players.csv".format(year, year + 1, my_league_struct["name"])
-_create_csv_output_file(teams_csv_name, my_team_struct)
-_create_csv_output_file(players_csv_name, my_player_struct)
+  ''' Print result in CSV format '''
 
-print("Finished! please import \"{}\" and \"{}\" to excel as CSV format to see the results.".format(teams_csv_name, players_csv_name))
+  teams_csv_name = "{}-{}_{}_teams.csv".format(year, year + 1, my_league_struct["name"])
+  players_csv_name = "{}-{}_{}_players.csv".format(year, year + 1, my_league_struct["name"])
+  _create_csv_output_file(teams_csv_name, my_team_struct)
+  _create_csv_output_file(players_csv_name, my_player_struct)
+
+  print("Finished! please import \"{}\" and \"{}\" to excel as CSV format to see the results.".format(teams_csv_name, players_csv_name))
+
+if __name__== "__main__":
+  main()
