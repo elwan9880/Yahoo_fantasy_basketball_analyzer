@@ -2,7 +2,6 @@
 z_score_generator
 '''
 
-from yahoo_oauth import OAuth2
 import yahoo_fantasy_api as yfa
 import json
 from urllib.request import urlopen
@@ -10,6 +9,8 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import unidecode
 from statistics import stdev, mean
+
+from client import Client
 
 N_PLAYERS_WITH_TOP_MPG = 300 # how many players want to retrieve based on minute per game
 SUPPORTED_YEARS = [2018, 2017, 2016, 2015]
@@ -267,41 +268,13 @@ def _create_my_team_struct(league, my_league_struct, my_player_struct):
 
   return my_team_struct
 
-def _print_options_and_get_input(name, my_list):
-  message = "Choose a {} ".format(name)
-  for index in range(len(my_list)):
-    if name is "season":
-      message += "{{{}: {}-{}}} ".format(index, my_list[index], my_list[index] + 1)
-    elif name is "league":
-      message += "{{{}: {}}} ".format(index, my_list[index][1])
-  message += "[default: 0]: "
-  input_id = input(message) or "0"
-  while int(input_id) not in range(0, len(my_list)):
-    input_id = input("Please enter an number between 0 to {}: ".format(len(my_list) - 1))
-
-  return int(input_id)
-
-
 def main():
   ''' Retrieve league data in Yahoo Fantasy Basketball '''
 
-  sc = OAuth2(None, None, from_file="oauth2.json")
-  game = yfa.Game(sc, "nba")
-
-  year = SUPPORTED_YEARS[_print_options_and_get_input("season", SUPPORTED_YEARS)]
-
-  league_id_name_pair_list = []
-  for item in game.league_ids(year=year):
-    league_id_name_pair_list.append((item, game.to_league(item).settings()["name"]))
-  if not league_id_name_pair_list:
-    print("No fantasy teams in {}-{} seasons...".format(year, year + 1))
-    exit(0)
-
-  input_id = _print_options_and_get_input("league", league_id_name_pair_list)
-  league_id = league_id_name_pair_list[int(input_id)][0]
-  league_name = league_id_name_pair_list[int(input_id)][1]
-  league = game.to_league(league_id)
-
+  client = Client("oauth2.json")
+  year = client.get_year()
+  league = client.get_yahoo_fantasy_api_league_struct()
+  league_name = client.get_league_name()
   print("You select: Season: {}-{}, League: {} ".format(year, year + 1, league_name))
 
   ''' Import basketball reference player total stats '''
