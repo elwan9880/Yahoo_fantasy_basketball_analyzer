@@ -11,6 +11,8 @@ import unidecode
 from statistics import stdev, mean
 
 from client import Client
+from nba_data import NBAData
+from player import Player
 
 N_PLAYERS_WITH_TOP_MPG = 300 # how many players want to retrieve based on minute per game
 SUPPORTED_YEARS = [2018, 2017, 2016, 2015]
@@ -108,12 +110,14 @@ def _create_player_stats_table(year):
   br_stats_table["Player"] = br_stats_table["Player"].apply(lambda x: _formalize_name(x))
   br_stats_table.set_index("Player", inplace=True)
 
-  # rename table header with Yahoo fantasy basketball stats name
+  # rename table header with Yahoo fantasy basketball stats name, type cast cells to float
+  br_stats_table = br_stats_table.replace("", 0)
   for key, value in BR_TO_YFB_STATS_NAME_MAP.items():
     br_stats_table = br_stats_table.rename(columns={key: value})
+    br_stats_table[value] = br_stats_table[value].apply(lambda x: float(x))
 
   # filter players based on MPG
-  br_stats_table["MPG"] = br_stats_table["MIN"].astype(float) / br_stats_table["GP"].astype(float)
+  br_stats_table["MPG"] = br_stats_table["MIN"] / br_stats_table["GP"]
   br_stats_table = br_stats_table.sort_values(by=['MPG'], ascending=False)
   br_stats_table = br_stats_table.head(N_PLAYERS_WITH_TOP_MPG)
   br_stats_table = br_stats_table.sort_index()
@@ -284,6 +288,8 @@ def main():
   print("Done")
 
   ''' Retrieve league stat categories and calculate league average and standard deviation using Basketball reference '''
+
+  nba_data = NBAData(stats_table)
 
   print("Retrieving league data ...", end = " ", flush = True)
   my_league_struct = _create_my_league_struct(league, stats_table)
