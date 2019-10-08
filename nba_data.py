@@ -58,3 +58,9 @@ class NBAData(object):
   def __get_players(self, stats_table):
     for index, row in stats_table.iterrows():
       self.__players[index] = Player(row, self.__stats_pool)
+
+  def get_stats_pool(self):
+    return self.__stats_pool
+
+  def get_players(self):
+    return self.__players

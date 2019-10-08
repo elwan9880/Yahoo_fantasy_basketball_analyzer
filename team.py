@@ -8,16 +8,20 @@ class Team(object):
   # average_stats - dict
   # z_scores - dict
 
-  self.name = ""
-  self.players = {}
-  self.total_stats = {}
-  self.average_stats = {}
-  self.z_scores = {}
+  __name = ""
+  __players = {}
+  __total_stats = {}
+  __average_stats = {}
+  __z_scores = {}
 
-  def __init__(self, yahoo_fantasy_api_league, NBAData)
+  def __init__(self, yahoo_fantasy_api_team, NBAData):
+    pass
 
   def __get_total_stats(self):
+    pass
 
   def __get_average_stats(self):
+    pass
 
   def __get_z_scores(self):
+    pass

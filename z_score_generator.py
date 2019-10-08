@@ -12,7 +12,9 @@ from statistics import stdev, mean
 
 from client import Client
 from nba_data import NBAData
+from fantasy_league_data import FantasyLeagueData
 from player import Player
+from team import Team
 
 N_PLAYERS_WITH_TOP_MPG = 300 # how many players want to retrieve based on minute per game
 SUPPORTED_YEARS = [2018, 2017, 2016, 2015]
@@ -302,6 +304,8 @@ def main():
   print("Done")
 
   ''' Create my_team_struct, parse roster from Yahoo Fantasy API and copy player data from my_player_struct '''
+
+  fantasy_league_data = FantasyLeagueData(league, nba_data)
 
   print("Calculating team performace ...", end = " ", flush = True)
   my_team_struct = _create_my_team_struct(league, my_league_struct, my_player_struct)
