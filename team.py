@@ -9,16 +9,13 @@ class Team(object):
   # average_stats - dict
   # z_scores - dict
 
-  __name = ""
-  __players = {}
-  __total_stats = {}
-  __average_stats = {}
-  __z_scores = {}
-
   def __init__(self, yahoo_fantasy_api_team, NBAData, week, name):
     self.__name = name
+    self.__players = {}
+    self.__total_stats = {}
+    self.__average_stats = {}
+    self.__z_scores = {}
     self.__get_players(yahoo_fantasy_api_team, NBAData, week)
-    print("{}".format(self.__players))
     self.__get_total_stats()
     self.__get_average_stats()
     self.__get_z_scores()

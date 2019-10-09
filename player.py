@@ -9,11 +9,6 @@ class Player(object):
   # average_stats: dict
   # z_scores: dict
 
-  __name = ""
-  __total_stats = {}
-  __average_stats = {}
-  __z_scores = {}
-
   def __init__(self, player_stats, stats_pool):
     self.__name = player_stats.name
     self.__total_stats = {}

@@ -11,10 +11,9 @@ class NBAData(object):
   #                  - standard_deviation: dict
   # players: dict of class player
 
-  __stats_pool = {}
-  __players = {}
-
   def __init__(self, stats_table):
+    self.__stats_pool = {}
+    self.__players = {}
     self.__stats_pool["total_stats"] = {}
     self.__stats_pool["average_stats"] = {}
     self.__stats_pool["standard_deviation"] = {}

@@ -10,11 +10,10 @@ class FantasyLeagueData(object):
   # stat_category: list
   # teams - dict of class team
 
-  __name = ""
-  __stat_categories = []
-  __teams = {}
-
   def __init__(self, yahoo_fantasy_api_league, NBAData):
+    self.__name = ""
+    self.__stat_categories = []
+    self.__teams = {}
     self.__name = yahoo_fantasy_api_league.settings()["name"]
     for stat_category in yahoo_fantasy_api_league.stat_categories():
       if STAT_CATEGORIES.get(stat_category["display_name"]) is not None:
