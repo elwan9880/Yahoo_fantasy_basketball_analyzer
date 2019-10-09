@@ -52,6 +52,9 @@ class Team(object):
       player_z_scores = player_object.get_z_scores()
       for stat_name, stat_value in player_z_scores.items():
         self.__z_scores[stat_name] += stat_value
+    for key, value in STAT_CATEGORIES.items():
+      self.__z_scores[key] /= len(self.__players)
+
 
   def get_name(self):
     return self.__name

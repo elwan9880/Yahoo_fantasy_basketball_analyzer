@@ -50,6 +50,7 @@ class NBAData(object):
           m = d * (row[value[1]] / row["GP"])
           stdev_temp_list.append(m)
         self.__stats_pool["standard_deviation"][key] = stdev(stdev_temp_list)
+        # note: the average for percentage stats is average of "impact" ((player_avg - league_avg) / player_attempt)
         self.__stats_pool["average_stats"][key] = mean(stdev_temp_list)
 
   def __get_players(self, stats_table):
