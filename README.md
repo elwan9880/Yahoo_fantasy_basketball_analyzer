@@ -1,7 +1,7 @@
-## z_score_generator
+## yahoo_fantasy_basketball_analyzer
 
-* Description
-  TBD
+* Description  
+  Generate average stats and z-scores from all teams in your Yahoo fantasy basketball league.  
 
 * Requirements
   * python3
@@ -17,11 +17,11 @@
 * How to use
   1. Create `oauth2.json` (https://yahoo-fantasy-api.readthedocs.io/en/latest/authentication.html).  
      1. Apply Yahoo API key (https://developer.yahoo.com/apps/create/). It will give you `consumer_key` and `consumer_secret`.   
-     2. Create `oauth.json` under the same directory with `z_score_generator.py` with your api key:  
+     2. Create `oauth.json` under the same directory with `yahoo_fantasy_basketball_analyzer.py` with your api key:  
         ```
         {"consumer_key": <your consumer_key>, "consumer_secret": <your consumer_secret>}
         ```
-  2. Run the script: `python z_score_generator.py`.  
+  2. Run the script: `python yahoo_fantasy_basketball_analyzer.py`.  
      1. It will pop a web browser window with your verifier. Enter the verifier in terminal.
      2. Enter the `year` and the `league_id` you would like to reference.
   3. Two CSV files will be created: 
@@ -31,7 +31,7 @@
 
 * Example:
   ```
-  Chun-Tses-MacBook-Pro:Yahoo_fantasy_basketball_analyzer cshao$ python3 z_score_generator.py
+  Chun-Tses-MacBook-Pro:Yahoo_fantasy_basketball_analyzer cshao$ python3 yahoo_fantasy_basketball_analyzer.py
   [2019-10-02 17:34:52,990 DEBUG] [yahoo_oauth.yahoo_oauth.__init__] Checking
   [2019-10-02 17:34:52,990 DEBUG] [yahoo_oauth.yahoo_oauth.handler] AUTHORISATION URL :  https://api.login.yahoo.com/oauth2/request_auth?client_secret=a0394eb953210395e94f4ce940df7c2b27f8e27b&redirect_uri=oob&response_type=code&client_id=dj0yJmk9Y2t1Q0FzSUx5S2YxJmQ9WVdrOVZFdzJZbmgwTkhVbWNHbzlNQS0tJnM9Y29uc3VtZXJzZWNyZXQmc3Y9MCZ4PThj
   ```
@@ -42,11 +42,7 @@
   Choose a league {0: 5566 Forever} {1: Avalon} [default: 0]:
   You select: Season: 2018-2019, League: 5566 Forever
   Parsing Basketball Reference 2018-2019 NBA players total stats ... Done
-  Retrieving league data ... Done
-  Calculating player performance ... Done
-  Calculating team performace ... Done
+  Retrieving NBA data and calculating player performace... Done
+  Calculating Fantasy team performace ... Done
   Finished! please import "2018-2019_5566 Forever_teams.csv" and "2018-2019_5566 Forever_players.csv" to excel as CSV format to see the results.
   ```
-
-* TODO:
-  * Check if z-score for FG% and FT% is right
