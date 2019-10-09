@@ -44,7 +44,7 @@ class Player(object):
         else:
           self.__z_scores[key] = (o - m) / s
       elif len(value) == 2:
-        league_average = divide(stats_pool["total_stats"][value[0]],  stats_pool["total_stats"][value[1]])
+        league_average = divide(stats_pool["total_stats"][value[0]], stats_pool["total_stats"][value[1]])
         player_average = divide(self.__total_stats[value[0]], self.__total_stats[value[1]])
         o = divide((player_average - league_average) * self.__total_stats[value[1]], self.__total_stats["GP"])
         m = stats_pool["average_stats"][key]

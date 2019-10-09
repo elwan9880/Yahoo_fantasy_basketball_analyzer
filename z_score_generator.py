@@ -97,7 +97,7 @@ def main():
   teams_csv_name = "{}-{}_{}_teams.csv".format(year, year + 1, fantasy_league_data.get_name())
   players_csv_name = "{}-{}_{}_players.csv".format(year, year + 1, fantasy_league_data.get_name())
   create_csv_output_file(teams_csv_name, fantasy_league_data.get_teams(), fantasy_league_data.get_stat_categories())
-  # create_csv_output_file(players_csv_name, my_player_struct)
+  create_csv_output_file(players_csv_name, nba_data.get_players(), fantasy_league_data.get_stat_categories())
 
   print("Finished! please import \"{}\" and \"{}\" to excel as CSV format to see the results.".format(teams_csv_name, players_csv_name))
 
