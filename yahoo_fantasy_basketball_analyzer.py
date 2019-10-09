@@ -1,5 +1,5 @@
 '''
-z_score_generator
+yahoo_fantasy_basketball_analyzer
 '''
 
 from client import Client
