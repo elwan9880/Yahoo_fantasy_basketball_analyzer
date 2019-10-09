@@ -2,7 +2,7 @@ import pandas
 
 from player import Player
 from utilities import divide, STAT_CATEGORIES
-from statistics import stdev
+from statistics import stdev, mean
 
 class NBAData(object):
 
@@ -52,6 +52,7 @@ class NBAData(object):
           m = d * (row[value[1]] / row["GP"])
           stdev_temp_list.append(m)
         self.__stats_pool["standard_deviation"][key] = stdev(stdev_temp_list)
+        self.__stats_pool["average_stats"][key] = mean(stdev_temp_list)
 
   def __get_players(self, stats_table):
     for index, row in stats_table.iterrows():
