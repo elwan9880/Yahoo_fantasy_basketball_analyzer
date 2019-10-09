@@ -1,7 +1,6 @@
 import pandas
 
-from stat_categories import STAT_CATEGORIES
-from utilities import formalize_name, divide
+from utilities import formalize_name, divide, STAT_CATEGORIES
 
 class Player(object):
 

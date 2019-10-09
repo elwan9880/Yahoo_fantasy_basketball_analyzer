@@ -1,6 +1,6 @@
 import yahoo_fantasy_api as yfa
 
-from stat_categories import STAT_CATEGORIES
+from utilities import STAT_CATEGORIES
 from nba_data import NBAData
 from team import Team
 
@@ -26,7 +26,7 @@ class FantasyLeagueData(object):
   def __get_teams(self, yahoo_fantasy_api_league, NBAData):
     for item in yahoo_fantasy_api_league.teams():
       yahoo_fantasy_api_team = yahoo_fantasy_api_league.to_team(item["team_key"])
-      self.__teams[item["name"]] = Team(yahoo_fantasy_api_team, NBAData)
+      self.__teams[item["name"]] = Team(yahoo_fantasy_api_team, NBAData, yahoo_fantasy_api_league.current_week(), item["name"])
 
   def get_name(self):
     return self.__name

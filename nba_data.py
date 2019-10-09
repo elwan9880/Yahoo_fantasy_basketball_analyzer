@@ -1,8 +1,7 @@
 import pandas
 
 from player import Player
-from stat_categories import STAT_CATEGORIES
-from utilities import divide
+from utilities import divide, STAT_CATEGORIES
 from statistics import stdev
 
 class NBAData(object):
