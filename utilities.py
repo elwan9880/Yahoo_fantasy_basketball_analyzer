@@ -72,9 +72,9 @@ def create_csv_output_file(file_name, dictionary, stat_categories):
   for key, item in dictionary.items():
     f.write("{},".format(key))
     for stat_name in stat_categories:
-      f.write("{},".format(item.get_average_stats()[stat_name]))
+      f.write("{0:.2f},".format(item.get_average_stats()[stat_name]))
     for stat_name in stat_categories:
-      f.write("{},".format(item.get_z_scores()[stat_name]))
+      f.write("{0:.2f},".format(item.get_z_scores()[stat_name]))
     f.write("\n")
   f.close()
 
