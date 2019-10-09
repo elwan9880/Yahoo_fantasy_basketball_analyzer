@@ -1,5 +1,3 @@
-import yahoo_fantasy_api as yfa
-
 from utilities import STAT_CATEGORIES
 from nba_data import NBAData
 from team import Team

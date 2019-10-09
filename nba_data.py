@@ -1,5 +1,3 @@
-import pandas
-
 from player import Player
 from utilities import divide, STAT_CATEGORIES
 from statistics import stdev, mean
