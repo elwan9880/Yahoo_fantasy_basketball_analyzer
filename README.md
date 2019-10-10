@@ -1,30 +1,32 @@
-## yahoo_fantasy_basketball_analyzer
+## Yahoo Fantasy Basketball Analyzer
 
-* Description  
-  Generate average stats and z-scores from all teams in your Yahoo fantasy basketball league.  
+* Description
+  Generate average stats and z-scores from all teams in your Yahoo fantasy basketball league.
 
 * Requirements
   * python3
-  * yahoo_fantasy_api (https://pypi.org/project/yahoo-fantasy-api/).  
+  * yahoo_fantasy_api (https://pypi.org/project/yahoo-fantasy-api/).
     ```pip install yahoo_fantasy_api```
-  * yahoo_oauth:  
+  * yahoo_oauth
     ```pip install yahoo_oauth```
+  * PyInquirer
+    ```pip install PyInquirer```
   * lxml
   * bs4
   * pandas
   * unidecode
 
 * How to use
-  1. Create `oauth2.json` (https://yahoo-fantasy-api.readthedocs.io/en/latest/authentication.html).  
-     1. Apply Yahoo API key (https://developer.yahoo.com/apps/create/). It will give you `consumer_key` and `consumer_secret`.   
-     2. Create `oauth.json` under the same directory with `yahoo_fantasy_basketball_analyzer.py` with your api key:  
+  1. Create `oauth2.json` (https://yahoo-fantasy-api.readthedocs.io/en/latest/authentication.html).
+     1. Apply Yahoo API key (https://developer.yahoo.com/apps/create/). It will give you `consumer_key` and `consumer_secret`.
+     2. Create `oauth.json` under the same directory with `yahoo_fantasy_basketball_analyzer.py` with your api key:
         ```
         {"consumer_key": <your consumer_key>, "consumer_secret": <your consumer_secret>}
         ```
-  2. Run the script: `python yahoo_fantasy_basketball_analyzer.py`.  
+  2. Run the script: `python yahoo_fantasy_basketball_analyzer.py`.
      1. It will pop a web browser window with your verifier. Enter the verifier in terminal.
      2. Enter the `year` and the `league_id` you would like to reference.
-  3. Two CSV files will be created: 
+  3. Two CSV files will be created:
      * `<season>_<league_name>_teams.csv`: Team with average stats and z-scores in your league
      * `<season>_<league_name>_players.csv`: Players with average stats and z-scores
   4. Import CSV files to google sheet or excel as CSV format (comma separated) to see the results.

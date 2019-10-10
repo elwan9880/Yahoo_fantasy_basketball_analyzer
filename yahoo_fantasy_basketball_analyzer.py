@@ -2,7 +2,7 @@
 yahoo_fantasy_basketball_analyzer
 '''
 
-from client import Client, MODE
+from client import Client
 from utilities import create_csv_output_file, create_player_stats_table
 from nba_data import NBAData
 from fantasy_league_data import FantasyLeagueData
@@ -23,7 +23,7 @@ def main():
   print("Done")
 
   csv_name = ""
-  if MODE[client.get_mode()] == "Fantasy team score":
+  if client.get_mode() == 0:
     print("Calculating Fantasy team performace ...", end = " ", flush = True)
     fantasy_league_data = FantasyLeagueData(client.get_yahoo_fantasy_api_league(), nba_data)
     print("Done")
@@ -31,7 +31,7 @@ def main():
     ''' Print result in CSV format '''
     csv_name = "{}-{}_{}_teams.csv".format(client.get_year(), client.get_year() + 1, fantasy_league_data.get_name())
     create_csv_output_file(csv_name, fantasy_league_data.get_teams(), fantasy_league_data.get_stat_categories())
-  elif MODE[client.get_mode()] == "Player score":
+  elif client.get_mode() == 1:
     csv_name = "{}-{}_players.csv".format(client.get_year(), client.get_year() + 1)
     create_csv_output_file(csv_name, nba_data.get_players(), client.get_user_selected_categories())
 
