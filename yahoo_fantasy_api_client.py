@@ -11,7 +11,7 @@ from utilities import STAT_CATEGORIES
 SUPPORTED_YEARS = [2018, 2017, 2016, 2015]
 MODE = ["Fantasy team score", "Player score"]
 
-class Client(object):
+class YahooFantasyApiClient(object):
 
   def __init__(self, oauth2_file):
     self.__league = None
