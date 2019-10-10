@@ -1,21 +1,12 @@
 ## Yahoo Fantasy Basketball Analyzer
 
-* Description  
+* Description
   * Generate average stats and z-scores for all teams in your Yahoo fantasy basketball league.
   * Generate average stats and z-scores for NBA players
 
-* Requirements
+* Installation
   * python3
-  * yahoo_fantasy_api (https://pypi.org/project/yahoo-fantasy-api/).
-    ```pip install yahoo_fantasy_api```
-  * yahoo_oauth
-    ```pip install yahoo_oauth```
-  * PyInquirer
-    ```pip install PyInquirer```
-  * lxml
-  * bs4
-  * pandas
-  * unidecode
+    ```pip install .```
 
 * How to use
   1. Create `oauth2.json` (https://yahoo-fantasy-api.readthedocs.io/en/latest/authentication.html).
