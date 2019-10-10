@@ -1,4 +1,4 @@
-from utilities import formalize_name, divide, STAT_CATEGORIES
+from .utilities import formalize_name, divide, STAT_CATEGORIES
 
 class Player(object):
 

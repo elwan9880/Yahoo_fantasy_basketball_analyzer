@@ -1,6 +1,6 @@
-from utilities import STAT_CATEGORIES
-from nba_data import NBAData
-from team import Team
+from .utilities import STAT_CATEGORIES
+from .nba_data import NBAData
+from .team import Team
 
 class FantasyLeagueData(object):
 

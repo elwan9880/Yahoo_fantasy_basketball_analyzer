@@ -1,13 +1,9 @@
-'''
-client.py
-'''
-
 from yahoo_oauth import OAuth2
 import yahoo_fantasy_api as yfa
 import json
 from PyInquirer import style_from_dict, Token, prompt, Separator
 
-from utilities import STAT_CATEGORIES
+from .utilities import STAT_CATEGORIES
 
 SUPPORTED_YEARS = {"2018-2019": 2018, "2017-2018": 2017, "2016-2017": 2016, "2015-2016": 2016}
 MODE = {"Fantasy Team Performance Analyzer": 0, "NBA Players Performance Analyzer": 1}

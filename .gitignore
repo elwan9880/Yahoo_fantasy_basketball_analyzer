@@ -1,2 +1,9 @@
 oauth2.json
 *.csv
+*.golden
+.DS_Store
+*.swp
+__pycache__
+*.egg-info
+build
+dist

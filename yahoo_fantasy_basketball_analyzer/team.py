@@ -1,6 +1,7 @@
-from player import Player
 from datetime import date
-from utilities import formalize_name, divide, STAT_CATEGORIES
+
+from .player import Player
+from .utilities import formalize_name, divide, STAT_CATEGORIES
 
 class Team(object):
 
