@@ -1,0 +1,7 @@
+yahoo_fantasy_api >= 1.4.1
+yahoo_oauth
+PyInquirer
+lxml
+bs4
+pandas
+unidecode
