@@ -13,7 +13,7 @@ SUPPORTED_YEARS = {"2018-2019": 2018, "2017-2018": 2017, "2016-2017": 2016, "201
 MODE = {"Fantasy Team Performance Analyzer": 0, "NBA Players Performance Analyzer": 1}
 DEFAULT_9_CATEGORIES = {"FG%", "FT%", "3PTM", "PTS", "REB", "AST", "ST", "BLK", "TO"}
 
-class Client(object):
+class YahooFantasyApiClient(object):
 
   def __init__(self, oauth2_file):
     self.__league = None
