@@ -1,7 +1,8 @@
 ## Yahoo Fantasy Basketball Analyzer
 
-* Description
-  Generate average stats and z-scores from all teams in your Yahoo fantasy basketball league.
+* Description  
+  * Generate average stats and z-scores for all teams in your Yahoo fantasy basketball league.
+  * Generate average stats and z-scores for NBA players
 
 * Requirements
   * python3
