@@ -67,15 +67,17 @@ def create_csv_output_file(file_name, dictionary, stat_categories):
     f.write("{},".format(stat_name))
   for stat_name in stat_categories:
     f.write("z{},".format(stat_name))
-  f.write("\n")
+  f.write("zTotal,\n")
 
   for key, item in dictionary.items():
+    total_z_score = 0;
     f.write("{},".format(key))
     for stat_name in stat_categories:
       f.write("{0:.2f},".format(item.get_average_stats()[stat_name]))
     for stat_name in stat_categories:
       f.write("{0:.2f},".format(item.get_z_scores()[stat_name]))
-    f.write("\n")
+      total_z_score += item.get_z_scores()[stat_name]
+    f.write("{0:.2f},\n".format(divide(total_z_score, len(stat_categories))))
   f.close()
 
 def create_player_stats_table(year):
