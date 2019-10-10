@@ -7,7 +7,6 @@ from utilities import create_csv_output_file, create_player_stats_table
 from nba_data import NBAData
 from fantasy_league_data import FantasyLeagueData
 from player import Player
-from team import Team
 
 def main():
 

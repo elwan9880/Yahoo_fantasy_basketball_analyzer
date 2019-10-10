@@ -1,4 +1,5 @@
 from player import Player
+from datetime import date
 from utilities import formalize_name, divide, STAT_CATEGORIES
 
 class Team(object):
@@ -9,20 +10,20 @@ class Team(object):
   # average_stats - dict
   # z_scores - dict
 
-  def __init__(self, yahoo_fantasy_api_team, NBAData, week, name):
+  def __init__(self, yahoo_fantasy_api_team, NBAData, name):
     self.__name = name
     self.__players = {}
     self.__total_stats = {}
     self.__average_stats = {}
     self.__z_scores = {}
-    self.__get_players(yahoo_fantasy_api_team, NBAData, week)
+    self.__get_players(yahoo_fantasy_api_team, NBAData)
     self.__get_total_stats()
     self.__get_average_stats()
     self.__get_z_scores()
 
-  def __get_players(self, yahoo_fantasy_api_team, NBAData, week):
+  def __get_players(self, yahoo_fantasy_api_team, NBAData):
     players = NBAData.get_players()
-    for player in yahoo_fantasy_api_team.roster(week):
+    for player in yahoo_fantasy_api_team.roster(day=date.today()):
       player_name = formalize_name(player["name"])
       if players.get(player_name) is None:
         continue

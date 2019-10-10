@@ -23,7 +23,7 @@ class FantasyLeagueData(object):
   def __get_teams(self, yahoo_fantasy_api_league, NBAData):
     for item in yahoo_fantasy_api_league.teams():
       yahoo_fantasy_api_team = yahoo_fantasy_api_league.to_team(item["team_key"])
-      self.__teams[item["name"]] = Team(yahoo_fantasy_api_team, NBAData, yahoo_fantasy_api_league.current_week(), item["name"])
+      self.__teams[item["name"]] = Team(yahoo_fantasy_api_team, NBAData, item["name"])
 
   def get_name(self):
     return self.__name
