@@ -5,7 +5,7 @@ from PyInquirer import style_from_dict, Token, prompt, Separator
 
 from .utilities import STAT_CATEGORIES
 
-SUPPORTED_YEARS = {"2018-2019": 2018, "2017-2018": 2017, "2016-2017": 2016, "2015-2016": 2016}
+SUPPORTED_YEARS = {"2018-2019": 2018, "2017-2018": 2017, "2016-2017": 2016, "2015-2016": 2015}
 MODE = {"Fantasy Team Performance Analyzer": 0, "NBA Players Performance Analyzer": 1}
 DEFAULT_9_CATEGORIES = {"FG%", "FT%", "3PTM", "PTS", "REB", "AST", "ST", "BLK", "TO"}
 
