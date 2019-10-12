@@ -9,12 +9,8 @@ def main():
   ''' Retrieve league data in Yahoo Fantasy Basketball '''
   yfa_client = yahoo_fantasy_api_client.YahooFantasyApiClient("oauth2.json")
 
-  print("  Parsing Basketball Reference NBA players total stats ...", end = " ", flush = True)
-  stats_table = utilities.create_player_stats_table(yfa_client.get_year())
-  print("Done")
-
   print("  Calculating player performace...", end = " ", flush = True)
-  my_nba_data = nba_data.NBAData(stats_table)
+  my_nba_data = nba_data.NBAData(yfa_client.get_year())
   print("Done")
 
   csv_name = ""
@@ -28,7 +24,7 @@ def main():
     csv_name = "{}-{}_players.csv".format(yfa_client.get_year(), yfa_client.get_year() + 1)
     utilities.create_csv_output_file(csv_name, my_nba_data.get_players(), yfa_client.get_user_selected_categories())
 
-  print("  Finished! please import \"{}\" to excel as CSV format to see the results.".format(csv_name))
+  print("  Finished! Please import \"{}\" to excel as CSV format to see the results.".format(csv_name))
 
 if __name__== "__main__":
   main()
