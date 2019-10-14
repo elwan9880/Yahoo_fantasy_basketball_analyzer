@@ -32,23 +32,46 @@ def formalize_name(name):
   name = name.replace("Jakob Poltl", "Jakob Poeltl").replace("Taurean Waller-Prince", "Taurean Prince").replace("Moe Harkless", "Maurice Harkless")
   return name
 
-def create_csv_output_file(file_name, dictionary, stat_categories):
-  f = open(file_name, "w+")
-  f.write(",")
-  for stat_name in stat_categories:
-    f.write("{},".format(stat_name))
-  for stat_name in stat_categories:
-    f.write("z{},".format(stat_name))
-  f.write("zTotal,\n")
+def output_players_csv_file(file_name, players, stat_categories, f = None):
+  f = f or open(file_name, "w+")
 
-  for key, item in dictionary.items():
-    total_z_score = 0;
-    f.write("{},".format(key))
-    for stat_name in stat_categories:
-      f.write("{0:.2f},".format(item.get_average_stats()[stat_name]))
-    for stat_name in stat_categories:
-      f.write("{0:.2f},".format(item.get_z_scores()[stat_name]))
-      total_z_score += item.get_z_scores()[stat_name]
-    f.write("{0:.2f},\n".format(divide(total_z_score, len(stat_categories))))
+  # Write titles
+  z_categories = list(map(lambda cat: "z" + cat, stat_categories))
+  titles = ["Player"] + stat_categories + z_categories + ["zTotal"]
+  write_lines(f, titles)
+
+  #write players
+  for name, player in players.items():
+    f.write(name)
+    write_lines(f, player.get_stats_with_selected_category(stat_categories), indents = 1)
   f.close()
+
+def output_league_csv_file(file_name, teams, stat_categories, f = None):
+  f = f or open(file_name, "w+")
+
+  # Write titles
+  z_categories = list(map(lambda cat: "z" + cat, stat_categories))
+  titles = ["Manager", "Player"] + stat_categories + z_categories + ["zTotal"]
+  write_lines(f, titles)
+
+  for team_name, team in teams.items():
+    # Write players' stats
+    for player_name, player in team.get_players().items():
+      write_lines(f, [team_name, player_name] + player.get_stats_with_selected_category(stat_categories))
+    # Write team stats
+    write_lines(f, [team_name, 'Team total'] + team.get_stats_with_selected_category(stat_categories))
+  f.close()
+
+def write_lines(f, list, indents = 0):
+  if list == None or f == None:
+    return
+  for i in range(0, indents):
+    f.write(",")
+  for item in list:
+    if isinstance(item, float):
+      f.write("{0:.2f},".format(item))
+    else:
+      f.write("{},".format(item))
+  f.write(",\n")
+
 

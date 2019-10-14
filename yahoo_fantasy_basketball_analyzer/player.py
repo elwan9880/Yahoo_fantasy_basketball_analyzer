@@ -62,4 +62,16 @@ class Player(object):
     return self.__z_scores
 
   def get_stats_with_selected_category(self, category_list):
-    pass
+    stats = []
+    length = len(category_list)
+    total_z_score = 0
+    for i, category in enumerate(category_list):
+      z_score = self.__z_scores[category]
+      total_z_score += z_score
+      stats.insert(i, self.__average_stats[category])
+      stats.insert(i + length, z_score)
+    stats.append(total_z_score)
+    return stats
+
+
+
