@@ -19,9 +19,9 @@ class Team(object):
     self.__z_scores = {}
     self.__stats = []
     self.__get_players(yahoo_fantasy_api_team, NBAData)
-    self.__get_total_stats()
-    self.__get_average_stats()
-    self.__get_z_scores()
+    self.calculate_total_stats()
+    self.calculate_average_stats()
+    self.calculate_z_scores()
 
   def __get_players(self, yahoo_fantasy_api_team, NBAData):
     players = NBAData.get_players()
@@ -31,7 +31,13 @@ class Team(object):
         continue
       self.__players[player_name] = NBAData.get_players()[player_name]
 
-  def __get_total_stats(self):
+  def remove_player(self, player_name):
+    self.__players.pop(player_name)
+
+  def add_player(self, player):
+    self.__players[player.get_name()] = player
+
+  def calculate_total_stats(self):
     for key, value in STAT_CATEGORIES.items():
       for stat in value:
         self.__total_stats[stat] = 0
@@ -41,14 +47,14 @@ class Team(object):
         if len(STAT_CATEGORIES[stat_name]) == 1:
           self.__total_stats[stat_name] += stat_value
 
-  def __get_average_stats(self):
+  def calculate_average_stats(self):
     for key, value in STAT_CATEGORIES.items():
       if len(value) == 1:
         self.__average_stats[key] = divide(self.__total_stats[key], self.__total_stats["GP"])
       elif len(value) == 2:
         self.__average_stats[key] = divide(self.__total_stats[value[0]], self.__total_stats[value[1]])
 
-  def __get_z_scores(self):
+  def calculate_z_scores(self):
     for key, value in STAT_CATEGORIES.items():
       self.__z_scores[key] = 0
     for player_name, player_object in self.__players.items():
