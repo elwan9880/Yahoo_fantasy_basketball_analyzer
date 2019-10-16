@@ -69,9 +69,9 @@ def write_lines(f, list, indents = 0):
     f.write(",")
   for item in list:
     if isinstance(item, float):
-      f.write("{0:.2f},".format(item))
+      f.write("{0:.3f},".format(item))
     else:
       f.write("{},".format(item))
-  f.write(",\n")
+  f.write("\n")
 
 

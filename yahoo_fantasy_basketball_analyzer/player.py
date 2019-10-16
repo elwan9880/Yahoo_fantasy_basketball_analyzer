@@ -70,7 +70,7 @@ class Player(object):
       total_z_score += z_score
       stats.insert(i, self.__average_stats[category])
       stats.insert(i + length, z_score)
-    stats.append(total_z_score)
+    stats.append(total_z_score / len(category_list))
     return stats
 
 
