@@ -49,17 +49,22 @@ def output_players_csv_file(file_name, players, stat_categories, f = None):
 def output_league_csv_file(file_name, teams, stat_categories, f = None):
   f = f or open(file_name, "w+")
 
-  # Write titles
   z_categories = list(map(lambda cat: "z" + cat, stat_categories))
-  titles = ["Manager", "Player"] + stat_categories + z_categories + ["zTotal"]
-  write_lines(f, titles)
 
+  # Write team stats
+  titles = ["Manager"] + stat_categories + z_categories + ["zTotal"]
+  write_lines(f, titles)
   for team_name, team in teams.items():
-    # Write players' stats
+    write_lines(f, [team_name] + team.get_stats_with_selected_category(stat_categories))
+  f.write("\n")
+
+  # Write team player stats
+  for team_name, team in teams.items():
+    titles = [team_name] + stat_categories + z_categories + ["zTotal"]
+    write_lines(f, titles)
     for player_name, player in team.get_players().items():
-      write_lines(f, [team_name, player_name] + player.get_stats_with_selected_category(stat_categories))
-    # Write team stats
-    write_lines(f, [team_name, 'Team total'] + team.get_stats_with_selected_category(stat_categories))
+      write_lines(f, [player_name] + player.get_stats_with_selected_category(stat_categories))
+    f.write("\n")
   f.close()
 
 def write_lines(f, list, indents = 0):
