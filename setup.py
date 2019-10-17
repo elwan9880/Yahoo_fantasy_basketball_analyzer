@@ -5,7 +5,7 @@ with open('requirements.txt') as f:
 
 setup(
     name="yahoo_fantasy_basketball_analyzer",
-    version="0.1.0",
+    version="0.1.1",
     install_requires=requirements,
     author="Chun-Tse Shao, Frank Shih",
     author_email="elwan9880@gmail.com",

@@ -40,6 +40,7 @@ class TradeAnalyzer(object):
     write_lines(f, titles)
     write_lines(f, [self.__team_1_after.get_name()] + self.__team_1_after.get_stats_with_selected_category(stat_categories))
     write_lines(f, [self.__team_2_after.get_name()] + self.__team_2_after.get_stats_with_selected_category(stat_categories))
+
     f.close()
 
   def __swap_players(self):
@@ -87,33 +88,24 @@ class TradeAnalyzer(object):
     answers = prompt(questions)
     self.__team_2_before = teams[answers["team_2"]]
     # team1 players
-    players_for_questions = []
-    for name in self.__team_1_before.get_players():
-      players_for_questions.append({"name": name})
-    questions = [
-        {
-            "type": "checkbox",
-            "name": "team_1_send_players",
-            "message": "Please choose players from {} to trade:".format(self.__team_1_before.get_name()),
-            "choices": players_for_questions
-        }
-    ]
-    answers = prompt(questions)
-    self.__team_1_send_players = answers["team_1_send_players"]
+    self.__team_1_send_players = self.__get_send_players(self.__team_1_before)
     # team2 players
+    self.__team_2_send_players = self.__get_send_players(self.__team_2_before)
+
+  def __get_send_players(self, team):
     players_for_questions = []
-    for name in self.__team_2_before.get_players():
+    for name in team.get_players():
       players_for_questions.append({"name": name})
     questions = [
         {
             "type": "checkbox",
-            "name": "team_2_send_players",
-            "message": "Please choose players from {} to trade:".format(self.__team_2_before.get_name()),
+            "name": "team_send_players",
+            "message": "Please choose players from {} to trade:".format(team.get_name()),
             "choices": players_for_questions
         }
     ]
     answers = prompt(questions)
-    self.__team_2_send_players = answers["team_2_send_players"]
+    return answers["team_send_players"]
 
   def get_team_1(self):
     return self.__team_1_after
