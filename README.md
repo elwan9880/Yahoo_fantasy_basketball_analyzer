@@ -6,7 +6,7 @@
   * Trade Analyzer for your Yahoo Fantasy Basketball league.
 
 * Requires
-  * python3
+  * python3.7
 
 * Installation
   ```
