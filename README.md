@@ -1,8 +1,9 @@
 ## Yahoo Fantasy Basketball Analyzer
 
 * Description
-  * Generate average stats and z-scores for all teams in your Yahoo fantasy basketball league.
-  * Generate average stats and z-scores for NBA players
+  * Average stats and Z-scores for teams in your Yahoo Fantasy Basketball league.
+  * Average stats and Z-scores for NBA players.
+  * Trade Analyzer for your Yahoo Fantasy Basketball league.
 
 * Requires
   * python3
@@ -25,8 +26,9 @@
      1. It will pop a web browser window with your verifier. Enter the verifier in terminal.
      2. Enter the `year` and the `league_id` you would like to reference.
   3. Choose the mode for analysis:
-     * `Yahoo_fantasy_basketball_analyzer`: create `<season>_<league_name>_teams.csv`: Fantasy league teams performance with average stats and z-scores in your league
-     * `Yahoo_fantasy_basketball_analyzer`: create `<season>_players.csv`: Players performance with average stats and z-scores
+     * `Fantasy Team Performance Analyzer`: Create `<season>_<league_name>_teams.csv`: Team performance with average stats and z-scores in your league
+     * `Fantasy Trade Analyzer`: create `<season>_<league_name>_<team_A>_<team_B>.csv`: Trade Analysis
+     * `NBA Players Performance Analyzer`: create `<season>_players.csv`: Players performance with average stats and z-scores
   4. Import CSV files to google sheet or excel as CSV format (comma separated) to see the results.
 
 * Example:
@@ -36,6 +38,6 @@
   ? And a NBA season:  2018-2019
   ? Select categories for analysis (default 9CAT):  done (9 selections)
   Parsing Basketball Reference NBA players total stats ... Done
-  Calculating player performace... Done
+  Calculating player performace ... Done
   Finished! please import "2018-2019_players.csv" to excel as CSV format to see the results.
   ```
