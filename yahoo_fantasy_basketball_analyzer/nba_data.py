@@ -5,7 +5,7 @@ import pandas as pd
 from statistics import stdev, mean
 
 from .player import Player
-from .utilities import formalize_name, divide, STAT_CATEGORIES
+from .utilities import formalize_name, divide, STAT_CATEGORIES, write_lines
 
 N_PLAYERS_WITH_TOP_MPG = 300 # how many players want to retrieve based on minute per game
 
@@ -127,3 +127,18 @@ class NBAData(object):
 
   def get_players(self):
     return self.__players
+
+  def create_csv_file(self, file_name, stat_categories, f = None):
+    f = f or open(file_name, "w+")
+
+    # Write titles
+    z_categories = list(map(lambda cat: "z" + cat, stat_categories))
+    titles = ["Player"] + stat_categories + z_categories + ["zTotal"]
+    write_lines(f, titles)
+
+    #write players
+    for name, player in self.__players.items():
+      f.write(name)
+      write_lines(f, player.get_stats_with_selected_category(stat_categories), indents = 1)
+    f.close()
+

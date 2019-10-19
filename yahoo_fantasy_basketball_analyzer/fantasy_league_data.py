@@ -1,4 +1,4 @@
-from .utilities import STAT_CATEGORIES
+from .utilities import STAT_CATEGORIES, write_lines
 from .nba_data import NBAData
 from .team import Team
 
@@ -39,3 +39,24 @@ class FantasyLeagueData(object):
 
   def get_teams(self):
     return self.__teams
+
+  def create_csv_file(self, file_name, f = None):
+    f = f or open(file_name, "w+")
+
+    z_categories = list(map(lambda cat: "z" + cat, self.__stat_categories))
+
+    # Write team stats
+    titles = ["Manager"] + self.__stat_categories + z_categories + ["zTotal"]
+    write_lines(f, titles)
+    for team_name, team in self.__teams.items():
+      write_lines(f, [team_name] + team.get_stats_with_selected_category(self.__stat_categories))
+    f.write("\n")
+
+    # Write team player stats
+    for team_name, team in self.__teams.items():
+      titles = [team_name] + self.__stat_categories + z_categories + ["zTotal"]
+      write_lines(f, titles)
+      for player_name, player in team.get_players().items():
+        write_lines(f, [player_name] + player.get_stats_with_selected_category(self.__stat_categories))
+      f.write("\n")
+    f.close()
