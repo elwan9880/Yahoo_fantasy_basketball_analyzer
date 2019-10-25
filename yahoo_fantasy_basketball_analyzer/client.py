@@ -4,7 +4,7 @@ from PyInquirer import prompt
 from .yahoo_fantasy_api_client import YahooFantasyApiClient
 from .utilities import STAT_CATEGORIES
 
-SUPPORTED_YEARS = {"2018-2019": 2018, "2017-2018": 2017, "2016-2017": 2016, "2015-2016": 2015}
+SUPPORTED_YEARS = {"2019-2020": 2019, "2018-2019": 2018, "2017-2018": 2017, "2016-2017": 2016, "2015-2016": 2015}
 MODE = {"Fantasy Team Performance Analyzer": 0, "Fantasy Trade Analyzer": 1, "NBA Players Performance Analyzer": 2}
 DEFAULT_9_CATEGORIES = {"FG%", "FT%", "3PTM", "PTS", "REB", "AST", "ST", "BLK", "TO"}
 
