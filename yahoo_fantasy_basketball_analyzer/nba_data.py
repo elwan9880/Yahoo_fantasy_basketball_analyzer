@@ -67,7 +67,15 @@ class NBAData(object):
 
     self.__stats_table = pd.DataFrame(player_stats, columns = headers)
     self.__stats_table = self.__stats_table.dropna()
+
+    # Replace player's team with the last team if the player played for more than a team in a season, then drop the duplicated data
+    # Note on basketball reference for a player with multiple row , the first row is stats with team "TOT", and the last row is stats with current team
+    for name in self.__stats_table[self.__stats_table["Player"].duplicated()]["Player"].drop_duplicates():
+      num_teams = len(self.__stats_table[self.__stats_table["Player"] == name])
+      current_team = self.__stats_table.loc[self.__stats_table["Player"] == name, "Tm"].iloc[num_teams - 1]
+      self.__stats_table.loc[self.__stats_table["Player"] == name, "Tm"] = current_team
     self.__stats_table.drop_duplicates(subset = "Player", inplace = True)
+
     self.__stats_table["Player"] = self.__stats_table["Player"].apply(lambda x: formalize_name(x))
     self.__stats_table.set_index("Player", inplace=True)
 
