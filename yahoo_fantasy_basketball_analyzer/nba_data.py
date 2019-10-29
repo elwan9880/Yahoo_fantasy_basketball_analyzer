@@ -1,8 +1,10 @@
 from urllib.request import urlopen
 import json
+import os
 from bs4 import BeautifulSoup
 import pandas as pd
 from statistics import stdev, mean
+from datetime import datetime
 
 from .player import Player
 from .utilities import formalize_name, divide, STAT_CATEGORIES, write_lines
@@ -50,6 +52,12 @@ class NBAData(object):
     self.__get_players()
 
   def __get_player_stats_table(self, year):
+    date = datetime.now().strftime('%Y-%m-%d')
+    filename = "tmp/player_stats_table_{}_{}.csv".format(year, date)
+    if os.path.exists(filename):
+      print("loaded from tmp")
+      self.__stats_table = pd.read_csv(filename, index_col = 0)
+      return
     # URL page we will scraping (see image above)
     url = "https://www.basketball-reference.com/leagues/NBA_{}_totals.html".format(year + 1)
     # this is the HTML from the given URL
@@ -90,6 +98,8 @@ class NBAData(object):
     self.__stats_table = self.__stats_table.sort_values(by=['MPG'], ascending=False)
     self.__stats_table = self.__stats_table.head(N_PLAYERS_WITH_TOP_MPG)
     self.__stats_table = self.__stats_table.sort_index()
+    os.makedirs(os.path.dirname(filename), exist_ok = True)
+    self.__stats_table.to_csv(filename)
 
   def __get_stats_pool(self):
     # league total stats
