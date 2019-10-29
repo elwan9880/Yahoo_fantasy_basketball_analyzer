@@ -55,7 +55,7 @@ class NBAData(object):
     date = datetime.now().strftime('%Y-%m-%d')
     filename = "tmp/player_stats_table_{}_{}.csv".format(year, date)
     if os.path.exists(filename):
-      print("loaded from tmp")
+      print("Loaded from tmp ...", end = " ", flush = True)
       self.__stats_table = pd.read_csv(filename, index_col = 0)
       return
     url = "https://www.basketball-reference.com/leagues/NBA_{}_totals.html".format(year + 1)
