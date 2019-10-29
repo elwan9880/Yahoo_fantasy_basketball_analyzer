@@ -12,6 +12,7 @@ class Player(object):
     self.__total_stats = {}
     self.__average_stats = {}
     self.__z_scores = {}
+    self.__stats_with_selected_category = []
     self.__get_player(player_stats, stats_pool)
 
   def __get_player(self, player_stats, stats_pool):
@@ -62,6 +63,11 @@ class Player(object):
     return self.__z_scores
 
   def get_stats_with_selected_category(self, category_list):
+    if not self.__stats_with_selected_category:
+      self.__stats_with_selected_category = self.__build_stats(category_list)
+    return self.__stats_with_selected_category
+
+  def __build_stats(self, category_list):
     stats = []
     length = len(category_list)
     total_z_score = 0
@@ -72,6 +78,5 @@ class Player(object):
       stats.insert(i + length, z_score)
     stats.append(total_z_score / len(category_list))
     return stats
-
 
 
