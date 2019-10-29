@@ -58,20 +58,13 @@ class NBAData(object):
       print("loaded from tmp")
       self.__stats_table = pd.read_csv(filename, index_col = 0)
       return
-    # URL page we will scraping (see image above)
     url = "https://www.basketball-reference.com/leagues/NBA_{}_totals.html".format(year + 1)
-    # this is the HTML from the given URL
     html = urlopen(url)
     soup = BeautifulSoup(html, "lxml")
-    # use findALL() to get the column headers
-    soup.findAll('tr', limit=2)
-    # use getText() to extract the text we need into a list
-    headers = [th.getText() for th in soup.findAll('tr', limit=2)[0].findAll('th')]
-    # exclude the first column as we will not need the ranking order from Basketball Reference for the analysis
+    headers = [th.get_text() for th in soup.find_all('tr', limit=2)[0].find_all('th')]
     headers = headers[1:]
-    # avoid the first header row
-    rows = soup.findAll('tr')[1:]
-    player_stats = [[td.getText() for td in rows[i].findAll('td')] for i in range(len(rows))]
+    rows = soup.find_all('tr')[1:]
+    player_stats = [[td.get_text() for td in rows[i].find_all('td')] for i in range(len(rows))]
 
     self.__stats_table = pd.DataFrame(player_stats, columns = headers)
     self.__stats_table = self.__stats_table.dropna()
