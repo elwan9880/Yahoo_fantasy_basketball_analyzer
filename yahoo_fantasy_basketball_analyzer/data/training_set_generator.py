@@ -6,14 +6,24 @@ import re
 
 year = 2018
 training_stats = "PTS"
-referred_games = int(sys.argv[1]) if len(sys.argv) > 1 else 5
-referred_stats = [training_stats, "GS", "MP", "FG", "FGA", "3P", "3PA", "FT", "FTA", "+/-"]
+
+predict_games =  int(sys.argv[1]) if len(sys.argv) > 1 else 4
+referred_games = int(sys.argv[2]) if len(sys.argv) > 1 else 4
+referred_stats_pool = {
+  "PTS": ["AVG_S", "MP", "FGA", "FG", "3PA", "3P", "FTA", "FT", "USG%"],
+  "TRB": ["AVG_S", "MP", "ORB", "DRB", "FG%", "FTA", "BLK", "PF"]
+}
+referred_stats = referred_stats_pool[training_stats]
 
 def find_csv_filenames(path_to_dir, suffix=".csv"):
-    filenames = listdir(path_to_dir)
-    return [filename for filename in filenames if filename.endswith( suffix )]
+  filenames = listdir(path_to_dir)
+  return [filename for filename in filenames if filename.endswith( suffix )]
 
-csv_name = "{}_{}_{}G_(".format(year, training_stats, referred_games)
+def mp_to_second(mp):
+  (m, s) = mp.split(":")
+  return int(m) * 60 + int(s)
+
+csv_name = "{}_{}-{}_{}G_(".format(year, training_stats, predict_games, referred_games)
 csv_name += "-".join(referred_stats).replace("+/-", "PN")
 csv_name += ").csv"
 with open(csv_name, "w", newline = "") as f:
@@ -23,22 +33,26 @@ with open(csv_name, "w", newline = "") as f:
   for item in referred_stats:
     for i in range(referred_games, 0, -1):
       header.append("{}_{}".format(item, i))
-  header.append(training_stats)
+  header.append("{}-{}G".format(training_stats, predict_games))
   wr.writerow(header)
 
   csv_names = find_csv_filenames("{}".format(year))
 
   for csv in csv_names:
     table = pd.read_csv("{}/{}".format(year, csv))
-    for i in range(referred_games, len(table.index)):
+    table = table.fillna(0)
+    for i in range(referred_games, len(table.index) - predict_games):
       row = [];
       for item in referred_stats:
         for j in range(referred_games, 0, -1):
-          data = table.iloc[i - j][item]
-          if item == "MP":
-            data = data.replace(":", ".")
+          if item == "AVG_S":
+            data = table.iloc[0: i - j + 1][training_stats].mean()
+          else:
+            data = table.iloc[i - j][item]
+            if item == "MP":
+              data = mp_to_second(data)
           row.append(data)
-      row.append(table.iloc[i][training_stats])
+      row.append(sum([table.iloc[k][training_stats] for k in range(i, i + predict_games)]) / predict_games)
       wr.writerow(row)
 
 f.close()

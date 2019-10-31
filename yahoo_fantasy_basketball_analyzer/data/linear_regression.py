@@ -12,5 +12,6 @@ y_pred = X.dot(theta)
 
 RMSE = ((y_pred - y) ** 2).mean() ** .5
 
-print("theta: {}".format(theta))
+print("y.mean: {}".format(y.mean()))
+print("theta: \n{}".format(theta))
 print("RMSE: {}".format(RMSE))
