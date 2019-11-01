@@ -56,7 +56,7 @@ for i in range(len(rows)):
       gamelog.append([td.get_text() for td in basic_rows[i].find_all(["th", "td"])] +
                      [td.get_text() for td in advanced_rows[i].find_all(["th", "td"]) if td["data-stat"] not in duplicated_data_stats])
 
-  with open("{}/{}.csv".format(year, player_name), "w", newline = "") as f:
+  with open("{}/player/{}.csv".format(year, player_name), "w", newline = "") as f:
     wr = csv.writer(f, quoting=csv.QUOTE_ALL)
     wr.writerow(header)
     for item in gamelog:
