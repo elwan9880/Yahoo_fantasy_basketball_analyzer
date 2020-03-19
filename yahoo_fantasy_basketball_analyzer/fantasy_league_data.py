@@ -27,8 +27,8 @@ class FantasyLeagueData(object):
         print(", ".join(unsupprted_categories) + " is(are) not supported and will be skipped ...", end = " ", flush = True)
 
   def __get_teams(self, yahoo_fantasy_api_league, NBAData):
-    for item in yahoo_fantasy_api_league.teams():
-      yahoo_fantasy_api_team = yahoo_fantasy_api_league.to_team(item["team_key"])
+    for key, item in yahoo_fantasy_api_league.teams().items():
+      yahoo_fantasy_api_team = yahoo_fantasy_api_league.to_team(key)
       self.__teams[item["name"]] = Team(yahoo_fantasy_api_team, NBAData, item["name"])
 
   def get_name(self):
