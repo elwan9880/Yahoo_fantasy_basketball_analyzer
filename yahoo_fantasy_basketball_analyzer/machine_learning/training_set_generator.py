@@ -31,9 +31,9 @@ def mp_to_second(mp):
   (m, s) = mp.split(":")
   return int(m) * 60 + int(s)
 
-csv_name = "{}_{}-{}_{}G_(".format(year, training_stats, predict_games, referred_games)
+csv_name = "{}_{}-{}_{}G_".format(year, training_stats, predict_games, referred_games)
 csv_name += "-".join(referred_player_stats).replace("+/-", "PN")
-csv_name += ").csv"
+csv_name += ".csv"
 with open(csv_name, "w", newline = "") as f:
   wr = csv.writer(f, quoting=csv.QUOTE_ALL)
 

@@ -5,53 +5,56 @@ import sys
 import torch
 from torch.autograd import Variable
 import torch.nn.functional as F
-from matplotlib import pyplot as plt
 
-class linearRegression(torch.nn.Module):
-  def __init__(self, inputSize, outputSize):
-    super(linearRegression, self).__init__()
-    self.linear = torch.nn.Linear(inputSize, outputSize, bias=True)
+# class linearRegression(torch.nn.Module):
+#   def __init__(self, inputSize, outputSize):
+#     super(linearRegression, self).__init__()
+#     self.linear = torch.nn.Linear(inputSize, outputSize, bias=True)
+#
+#   def forward(self, x):
+#     out = self.linear(x)
+#     return out
+#
+# class Net(torch.nn.Module):
+#   def __init__(self, n_feature, n_hidden, n_output):
+#     super(Net, self).__init__()
+#     self.hidden = torch.nn.Linear(n_feature, n_hidden)   # hidden layer
+#     self.predict = torch.nn.Linear(n_hidden, n_output, bias=True)   # output layer
+#
+#   def forward(self, x):
+#     x = F.relu(self.hidden(x))      # activation function for hidden layer
+#     x = self.predict(x)             # linear output
+#     return x
+TRAIN_PROPORTION=0.8
+TEST_PROPORTION=0.2
+LEARNING_RATE = 0.001
+EPOCHS = 10000
 
-  def forward(self, x):
-    out = self.linear(x)
-    return out
+table = pd.read_csv(sys.argv[1]).dropna().sample(frac=1)
+train_length = int(len(table.index) * TRAIN_PROPORTION)
 
-class Net(torch.nn.Module):
-  def __init__(self, n_feature, n_hidden, n_output):
-    super(Net, self).__init__()
-    self.hidden = torch.nn.Linear(n_feature, n_hidden)   # hidden layer
-    self.predict = torch.nn.Linear(n_hidden, n_output, bias=True)   # output layer
-
-  def forward(self, x):
-    x = F.relu(self.hidden(x))      # activation function for hidden layer
-    x = self.predict(x)             # linear output
-    return x
-
-table = pd.read_csv(sys.argv[1]).dropna()
-x_value = table.iloc[:, 0: len(table.columns) - 1].assign(C = 1).values
-x_train = np.array(x_value, dtype=np.float32)
+x_value = table.iloc[: , 0: len(table.columns) - 1].assign(C = 1).values
+x_train = np.array(x_value[0: train_length, :], dtype=np.float32)
+x_test = np.array(x_value[train_length + 1: , :], dtype=np.float32)
 
 y_value = table.iloc[:, len(table.columns) - 1].values.reshape(-1, 1)
-y_train = np.array(y_value, dtype=np.float32)
-
-input_dim = x_train.shape[1]        # takes variable 'x'
-output_dim = y_train.shape[1]       # takes variable 'y'
-learning_rate = 0.001
-epochs = 10000
+y_train = np.array(y_value[0: train_length, :], dtype=np.float32)
+y_test = np.array(y_value[train_length + 1: , :], dtype=np.float32)
 
 # model = linearRegression(input_dim, output_dim)
 # model = Net(n_feature=input_dim, n_hidden=3, n_output=output_dim)
 model = torch.nn.Sequential (
-          torch.nn.Linear(input_dim, 3),
+          torch.nn.Linear(x_train.shape[1], 10),
           torch.nn.LeakyReLU(),
-          torch.nn.Linear(3, 3),
+          torch.nn.Linear(10, 3),
           torch.nn.LeakyReLU(),
-          torch.nn.Linear(3, output_dim),
+          torch.nn.Linear(3, 1),
+          torch.nn.LeakyReLU()
         )
 criterion = torch.nn.MSELoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.01)
+optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=0.01)
 
-for epoch in range(epochs):
+for epoch in range(EPOCHS):
   inputs = Variable(torch.from_numpy(x_train))
   labels = Variable(torch.from_numpy(y_train))
 
@@ -74,8 +77,7 @@ for epoch in range(epochs):
     print('epoch {}, loss {}'.format(epoch, loss.item()))
 
 with torch.no_grad(): # we don't need gradients in the testing phase
-  predicted = model(inputs).data.numpy()
-  print(predicted)
+  predicted = model(Variable(torch.from_numpy(x_test))).data.numpy()
+  RMSE = ((predicted - y_test) ** 2).mean() ** .5
+  print("RMSE: {}".format(RMSE))
 
-RMSE = ((predicted - y_train) ** 2).mean() ** .5
-print("RMSE: {}".format(RMSE))
