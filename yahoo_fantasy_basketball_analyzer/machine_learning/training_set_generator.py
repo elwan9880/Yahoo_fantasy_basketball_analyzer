@@ -10,7 +10,7 @@ training_stats = "PTS"
 predict_games =  int(sys.argv[1]) if len(sys.argv) > 1 else 4
 referred_games = int(sys.argv[2]) if len(sys.argv) > 1 else 4
 referred_player_stats_pool = {
-  "PTS": ["AVG_S", "MP", "FGA", "FG", "3PA", "3P", "FTA", "FT", "USG%", "ORtg"],
+  "PTS": [ "MP", "FGA", "FG", "3PA", "3P", "FTA", "FT", "USG%", "ORtg"],
   "TRB": ["AVG_S", "MP", "ORB", "DRB", "FG%", "FTA", "BLK", "PF"]
 }
 referred_team_stats_pool = {
@@ -44,10 +44,10 @@ with open(csv_name, "w", newline = "") as f:
   header.append("{}-{}G".format(training_stats, predict_games))
   wr.writerow(header)
 
-  csv_names = find_csv_filenames("{}/player".format(year))
+  csv_names = find_csv_filenames("data/{}/player".format(year))
 
   for csv in csv_names:
-    table = pd.read_csv("{}/player/{}".format(year, csv))
+    table = pd.read_csv("data/{}/player/{}".format(year, csv))
     table = table.fillna(0)
     for i in range(referred_games, len(table.index) - predict_games):
       row = [];
