@@ -12,12 +12,14 @@ def mp_to_second(mp):
   (m, s) = mp.split(":")
   return int(m) * 60 + int(s)
 
-def db_to_df(db, target, ref=4, pred=4, stats_pool=STATS_POOL):
+def db_to_df(db, target, ref=4, pred=4, ref_stats=[]):
   table_name = "_REF{}_PRED{}".format(ref, pred)
   con = sqlite3.connect(db)
 
+  if not ref_stats:
+    ref_stats = STATS_POOL[target]
   x_query = []
-  for item in stats_pool[target]:
+  for item in ref_stats:
     for i in range(ref, 0, -1):
       x_query.append("x{}_{}".format(item, i))
 
