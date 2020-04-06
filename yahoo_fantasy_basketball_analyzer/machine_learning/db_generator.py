@@ -9,7 +9,7 @@ def find_csv_filenames(path_to_dir, suffix=".csv"):
 def create_db_from_csv(year=2018):
   csv_dir = "data/{}/player/".format(year)
 
-  con = sqlite3.connect("players_{}.db".format(year))
+  con = sqlite3.connect("{}_player.db".format(year))
 
   player_names = []
   csv_names = find_csv_filenames(csv_dir)

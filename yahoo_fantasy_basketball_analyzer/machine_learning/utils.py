@@ -70,5 +70,8 @@ def create_referred_data_table(db, ref=4, pred=4, update=False):
 
   con.close()
 
-if __name__ == "__main__":
-  create_referred_data_table("players_2018.db")
+def create_dataset(db, target, ref_stats=[], ref=4, pred=4):
+   create_referred_data_table(db, ref=ref, pred=pred)
+   x_table, y_table = db_to_df(db, ref=ref, pred=pred, target=target, ref_stats=ref_stats)
+
+   return x_table, y_table

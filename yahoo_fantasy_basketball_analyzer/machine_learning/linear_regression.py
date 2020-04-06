@@ -17,8 +17,8 @@ PREDICTED_GAMES=4
 # y_value = table.iloc[:, len(table.columns) - 1].values.reshape(-1, 1)
 
 # Using db as input
-utils.create_referred_data_table(sys.argv[1])
-x_table, y_table = utils.db_to_df(sys.argv[1], ref=REFERRED_GAMES, pred=PREDICTED_GAMES, target=TARGET, ref_stats=REFERRED_STATS)
+x_table, y_table = utils.create_dataset(sys.argv[1], ref=REFERRED_GAMES, pred=PREDICTED_GAMES, target=TARGET, ref_stats=REFERRED_STATS)
+
 train_length = int(len(x_table.index) * TRAIN_PROPORTION)
 x_value = x_table.assign(C = 1).values
 y_value = y_table.values.reshape(-1, 1)
